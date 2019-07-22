@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="14313.18" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina6_5" orientation="portrait">
+        <adaptation id="fullscreen"/>
+    </device>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14283.14"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <view clipsSubviews="YES" contentMode="scaleToFill" id="iN0-l3-epB" customClass="RefreshView" customModule="Eksilik" customModuleProvider="target">
+            <rect key="frame" x="0.0" y="0.0" width="702" height="580"/>
+            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+            <subviews>
+                <imageView userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="logo" translatesAutoresizingMaskIntoConstraints="NO" id="1Wh-wW-DOP">
+                    <rect key="frame" x="227" y="263" width="212" height="54"/>
+                </imageView>
+            </subviews>
+            <constraints>
+                <constraint firstItem="vUN-kp-3ea" firstAttribute="trailing" secondItem="1Wh-wW-DOP" secondAttribute="trailing" constant="263" id="BSu-LL-DBM"/>
+                <constraint firstItem="1Wh-wW-DOP" firstAttribute="top" secondItem="vUN-kp-3ea" secondAttribute="top" constant="219" id="DQx-dm-Mt9"/>
+                <constraint firstItem="1Wh-wW-DOP" firstAttribute="centerY" secondItem="iN0-l3-epB" secondAttribute="centerY" id="Qnr-nb-P1G"/>
+                <constraint firstItem="1Wh-wW-DOP" firstAttribute="leading" secondItem="vUN-kp-3ea" secondAttribute="leading" constant="227" id="fwm-e3-6Dw"/>
+            </constraints>
+            <freeformSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
+            <viewLayoutGuide key="safeArea" id="vUN-kp-3ea"/>
+            <connections>
+                <outlet property="imgVLogo" destination="1Wh-wW-DOP" id="NdW-sZ-RuX"/>
+            </connections>
+            <point key="canvasLocation" x="-208.69565217391306" y="129.24107142857142"/>
+        </view>
+    </objects>
+    <resources>
+        <image name="logo" width="810" height="450"/>
+    </resources>
+</document>

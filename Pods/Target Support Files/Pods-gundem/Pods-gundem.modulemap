@@ -1,0 +1,6 @@
+framework module Pods_gundem {
+  umbrella header "Pods-gundem-umbrella.h"
+
+  export *
+  module * { export * }
+}

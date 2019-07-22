@@ -1,0 +1,6 @@
+framework module Pods_Eksilik {
+  umbrella header "Pods-Eksilik-umbrella.h"
+
+  export *
+  module * { export * }
+}
