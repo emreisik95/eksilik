@@ -1,5 +1,4 @@
 # eksilik
-<img src="https://travis-ci.com/emreisik95/eksilik.svg?branch=master" alt="eksilikstatus" />
 <img src="https://is3-ssl.mzstatic.com/image/thumb/Purple123/v4/35/07/8d/35078d3e-79c7-04e0-07a1-3560c09cd532/AppIcon-0-1x_U007emarketing-0-0-GLES2_U002c0-512MB-sRGB-0-0-0-85-220-0-0-0-7.png/246x0w.jpg" alt="ek$ilik" style="margin:0 auto; width:100%;"/>
 ek$ilik app reklamsız bir ekşi sözlük uygulamasıdır. tüm verileri ekşi sözlük üzerinden parse eder ve hiçbir kullanıcının verisini kaydetmez.
 
