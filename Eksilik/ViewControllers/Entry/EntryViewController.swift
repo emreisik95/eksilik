@@ -1116,7 +1116,7 @@ class EntryViewController: UIViewController, UITableViewDataSource, UITableViewD
         else{
         }
         cell.selectionStyle = .none
-        cell.entryText.attributedText = self.entryler[indexPath.row]
+                cell.entryText.attributedText = self.entryler[indexPath.row]
         cell.favoriButton.setTitle("\(self.favoriSayisi[indexPath.row]) fav", for: .normal)
         cell.entryNoLabel.text = "#\(self.linkler[indexPath.row])"
         cell.tarihLabel.text = self.tarihler[indexPath.row]
@@ -1314,38 +1314,38 @@ class EntryViewController: UIViewController, UITableViewDataSource, UITableViewD
             response in
             if let html = response.result.value{
                 self.anlam = [String]()
-                self.linkler = [String]()
-                self.tarihler = [String]()
-                self.yildizlar = [String]()
-                self.kullaniciAdi = [String]()
-                self.fav = [Bool]()
-                self.baslikKontrolu = [String]()
-                self.sukela = [Bool]()
-                self.kotule = [Bool]()
-                self.yildizsayisi = 0
                 self.secim = Bool()
-                self.array = [String]()
+                self.array.removeAll()
                 self.secti = Int()
                 self.barAccessory = UIToolbar()
                 self.takipNo = ""
-                self.authorId = [String]()
                 self.eID = ""
                 self.duzenleLinki = ""
                 self.baslikKontrolLink = [String]()
                 self.anlamAyrimi = [String]()
                 self.pager = 1
-                self.favoriler = [NSAttributedString]()
+                self.favoriler.removeAll()
+                self.fav = [Bool]()
+                self.baslikKontrolu.removeAll()
+                self.sukela = [Bool]()
+                self.kotule = [Bool]()
                 self.favoriGetir(html: html)
-                self.userName = [String]()
+                self.userName.removeAll()
+                self.authorId.removeAll()
+                self.kullaniciAdi.removeAll()
                 self.kullanici(html: html)
                 self.BaslikGetir(html: html)
+                self.yildizsayisi = 0
+                self.linkler.removeAll()
                 self.BasliklinkiGetir(html: html)
                 self.sayfaSayisiGetir(html: html)
                 self.girisKontrol(html: html)
                 self.baslikKontrol(html: html)
-                self.favoriSayisi = [Int]()
+                self.favoriSayisi.removeAll()
                 self.favoriSayisiGetir(html: html)
-                self.entryler = [NSAttributedString]()
+                self.entryler.removeAll()
+                self.tarihler.removeAll()
+                self.yildizlar.removeAll()
                 self.entryleriGetir(html: html)
                 self.suserGetir(html: html)
                 self.tarihGetir(html: html)
@@ -1675,6 +1675,7 @@ class EntryViewController: UIViewController, UITableViewDataSource, UITableViewD
                 }
             }
         }
+        CustomLoader.instance.hideLoaderView()
     }
     var tumuLink = String()
     func BaslikGetir(html: String) -> Void {
@@ -1698,9 +1699,7 @@ class EntryViewController: UIViewController, UITableViewDataSource, UITableViewD
                 tlabel.numberOfLines = 2
                 tlabel.adjustsFontSizeToFitWidth = true
                 self.navigationItem.titleView = tlabel
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                    CustomLoader.instance.hideLoaderView()
-                }
+
             }
         }
     }

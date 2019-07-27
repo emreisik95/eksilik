@@ -10,8 +10,9 @@ import UIKit
 import Alamofire
 import Kanna
 import SafariServices
+import InputBarAccessoryView
 
-class mesajIcerikViewController: UIViewController, UITextViewDelegate,UITableViewDelegate, UITableViewDataSource, SFSafariViewControllerDelegate{
+class mesajIcerikViewController: UIViewController, UITextViewDelegate,UITableViewDelegate, UITableViewDataSource, SFSafariViewControllerDelegate, InputBarAccessoryViewDelegate, UITextFieldDelegate{
 
     @IBOutlet weak var mesajView: UITableView!
     
@@ -21,6 +22,8 @@ class mesajIcerikViewController: UIViewController, UITextViewDelegate,UITableVie
     var asilLink = ""
     var icerikLink = ""
     var baslik = ""
+    var token = ""
+    var cevap = true
     
     override func viewWillAppear(_ animated: Bool) {
         CustomLoader.instance.showLoaderView()
@@ -28,8 +31,39 @@ class mesajIcerikViewController: UIViewController, UITextViewDelegate,UITableVie
         prepareUI()
     }
     
+    public let inputBar = InputBarAccessoryView()
+    
+    override var inputAccessoryView: UIView? {
+        return inputBar
+    }
+    
+    override var canBecomeFirstResponder: Bool {
+        return true
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+        inputBar.isHidden = false
+        inputBar.delegate = self
+        inputBar.backgroundColor = Theme.backgroundColor
+        inputBar.inputTextView.delegate = self
+        inputBar.inputTextView.backgroundColor = Theme.backgroundColor
+        inputBar.inputTextView.textColor = Theme.labelColor
+        inputBar.sendButton.setTitle("yolla", for: .normal)
+        inputBar.sendButton.backgroundColor = Theme.backgroundColor
+        inputBar.sendButton.setTitleColor(Theme.userColor, for: .normal)
+        inputBar.sendButton.activityViewColor = Theme.userColor
+        inputBar.backgroundView.backgroundColor = Theme.backgroundColor
+        inputBar.inputTextView.placeholder = "mesajınızı yazın..."
+        let bkzButton = InputBarButtonItem()
+        bkzButton.setSize(CGSize(width: 36, height: 36), animated: false)
+        bkzButton.setImage(#imageLiteral(resourceName: "ekşilik logosu").withRenderingMode(.alwaysTemplate), for: .normal)
+        bkzButton.imageView?.contentMode = .scaleAspectFit
+        bkzButton.tintColor = Theme.userColor
+        bkzButton.addTarget(self, action: #selector(bkzBtn), for: .touchUpInside)
+        bkzButton.setTitleColor(Theme.userColor, for: .normal)
+        inputBar.setLeftStackViewWidthConstant(to: 36, animated: false)
+        inputBar.setStackViewItems([bkzButton], forStack: .left, animated: true)
         tabBarController?.tabBar.installBlurEffect()
         self.navigationController?.navigationBar.tintColor = Theme.titleColor
         self.navigationController?.navigationBar.installBlurEffect()
@@ -39,15 +73,149 @@ class mesajIcerikViewController: UIViewController, UITextViewDelegate,UITableVie
         mesajView.dataSource = self
         mesajView.backgroundColor = Theme.backgroundColor!
         mesajView.separatorStyle = .none
+        mesajView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: inputBar.frame.height + 80, right: 0)
         self.view.backgroundColor = Theme.backgroundColor!
         self.navigationItem.leftBarButtonItem?.tintColor = Theme.titleColor
-        self.navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .compose, target: self, action: #selector(cevapla))
+        self.navigationItem.rightBarButtonItem = nil
+        let tapGestureRecognizer = UITapGestureRecognizer(target:self, action: #selector(biri))
+        self.navigationController?.navigationBar.addGestureRecognizer(tapGestureRecognizer)
         prepareUI()
         // Do any additional setup after loading the view.
     }
+    
+    @objc func biri(){
+        let vc =
+            self.storyboard?.instantiateViewController(withIdentifier:
+                "suserProfile") as! SuserViewController
+        vc.biriLink = "biri/\(self.baslik.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed)!)"
+        self.navigationController?.pushViewController(vc, animated: true)
+    }
+    
+    @objc func bkzBtn(){
+    let alert = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+        alert.addAction(UIAlertAction(title: "(bkz:)", style: .default, handler: { (UIAlertAction) in
+            self.bkz()
+        }))
+        alert.addAction(UIAlertAction(title: "hede", style: .default, handler: { (UIAlertAction) in
+            self.hede()
+        }))
+        alert.addAction(UIAlertAction(title: "*", style: .default, handler: { (UIAlertAction) in
+            self.yildiz()
+        }))
+        alert.addAction(UIAlertAction(title: "-spoiler-", style: .default, handler: { (UIAlertAction) in
+            self.spoiler()
+        }))
+        alert.addAction(UIAlertAction(title: "http://", style: .default, handler: { (UIAlertAction) in
+            self.http()
+        }))
+        alert.addAction(UIAlertAction(title: "vazgeç", style: .cancel, handler: { (UIAlertAction) in
+            self.dismiss(animated: true, completion: nil)
+        }))
+        alert.view.tintColor = Theme.userColor
+        alert.view.backgroundColor = Theme.backgroundColor
+        self.present(alert, animated: true)
+    }
+    
+    func bkz() {
+        let alert = UIAlertController(title: "(bkz:) ekle", message: "neye bkz verilsin?", preferredStyle: .alert)
+        //2. Add the text field. You can configure it however you need.
+        alert.addTextField { (textField) in
+            textField.placeholder = "hede"
+        }
+        
+        // 3. Grab the value from the text field, and print it when the user clicks OK.
+        alert.addAction(UIAlertAction(title: "ekle", style: .default, handler: { [weak alert] (_) in
+            let textField = alert?.textFields![0] // Force unwrapping because we know it exists.
+            self.inputBar.inputTextView.text = self.inputBar.inputTextView.text + "(bkz: \(textField!.text!))"
+        }))
+        alert.addAction(UIAlertAction(title: "vazgeç", style: .cancel, handler: { (UIAlertAction) in
+        }))
+        alert.view.backgroundColor = Theme.backgroundColor
+        alert.view.tintColor = Theme.userColor
+        alert.view.layer.cornerRadius = 25
+        alert.view.layer.borderColor = Theme.userColor?.cgColor
+        alert.view.layer.borderWidth = 0
+        // 4. Present the alert.
+        self.present(alert, animated: true, completion: nil)
+    }
+    func hede() {
+        let alert = UIAlertController(title: "hede ekle", message: "hangi başlık için link oluşturulacak?", preferredStyle: .alert)
+        alert.addTextField { (textField) in
+            textField.placeholder = "hede"
+        }
+        alert.addAction(UIAlertAction(title: "ekle", style: .default, handler: { [weak alert] (_) in
+            let textField = alert?.textFields![0] // Force unwrapping because we know it exists.
+            self.inputBar.inputTextView.text = self.inputBar.inputTextView.text + "`\(textField!.text!)`"
+        }))
+        alert.addAction(UIAlertAction(title: "vazgeç", style: .cancel, handler: { (UIAlertAction) in
+        }))
+        alert.view.backgroundColor = Theme.backgroundColor
+        alert.view.tintColor = Theme.userColor
+        alert.view.layer.cornerRadius = 25
+        alert.view.layer.borderColor = Theme.userColor?.cgColor
+        alert.view.layer.borderWidth = 0
+        self.present(alert, animated: true, completion: nil)
+    }
+    func yildiz() {
+    let alert = UIAlertController(title: "gizli bkz ekle", message: "yıldız içinde ne görünecek?", preferredStyle: .alert)
+    alert.addTextField { (textField) in
+    textField.placeholder = "hede"
+    }
+    alert.addAction(UIAlertAction(title: "ekle", style: .default, handler: { [weak alert] (_) in
+    let textField = alert?.textFields![0] // Force unwrapping because we know it exists.
+    self.inputBar.inputTextView.text = self.inputBar.inputTextView.text + "`:\(textField!.text!)`"
+    }))
+    alert.addAction(UIAlertAction(title: "vazgeç", style: .cancel, handler: { (UIAlertAction) in
+    }))
+    
+    self.present(alert, animated: true, completion: nil)
+    
+    }
+    func spoiler() {
+        let alert = UIAlertController(title: "spoiler ekle", message: "şpoyler şeysi arasına ne yazılacak?", preferredStyle: .alert)
+        alert.addTextField { (textField) in
+            textField.placeholder = "hede"
+        }
+        alert.addAction(UIAlertAction(title: "ekle", style: .default, handler: { [weak alert] (_) in
+            let textField = alert?.textFields![0] // Force unwrapping because we know it exists.
+            self.inputBar.inputTextView.text = self.inputBar.inputTextView.text + "--- `spoiler` ---\n\(textField!.text!)\n--- `spoiler` ---"
+        }))
+        alert.addAction(UIAlertAction(title: "vazgeç", style: .cancel, handler: { (UIAlertAction) in
+        }))
+        self.present(alert, animated: true, completion: nil)
+        
+    }
+    func http() {
+        let alert = UIAlertController(title: "link ekle", message: "hangi adrese gidecek?", preferredStyle: .alert)
+        alert.addTextField { (textField) in
+            textField.text = "http://"
+        }
+        alert.addAction(UIAlertAction(title: "ekle", style: .default, handler: { [weak alert] (_) in
+            let textField = alert?.textFields![0] // Force unwrapping because we know it exists.
+            self.inputBar.inputTextView.text = self.inputBar.inputTextView.text + "\(textField!.text!)"
+        }))
+        alert.addAction(UIAlertAction(title: "vazgeç", style: .cancel, handler: { (UIAlertAction) in
+        }))
+        self.present(alert, animated: true, completion: nil)
+    }
+
+    
+    func textViewDidBeginEditing(_ textView: UITextView) {
+        mesajView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: UIScreen.main.bounds.height/2, right: 0)
+        self.scrollToBottom()
+    }
+    
+    func inputBar(_ inputBar: InputBarAccessoryView, didPressSendButtonWith text: String) {
+        gonder()
+        inputBar.inputTextView.endEditing(true)
+        inputBar.inputTextView.text.removeAll()
+        inputBar.sendButton.startAnimating()
+    }
+
     @objc func cevapla(){
         performSegue(withIdentifier: "mesajAt", sender: nil)
     }
+    
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         let vc = segue.destination as! mesajYazViewController
         vc.baslikLinki = icerikLink
@@ -84,6 +252,71 @@ class mesajIcerikViewController: UIViewController, UITextViewDelegate,UITableVie
         }
         return false
     }
+    @objc func gonder(){
+        if inputBar.inputTextView.text.count < 1{
+            self.view.makeToast("bi' şeyler yazmadan gönderemem ki", duration: 3.0, position: .top)
+        }else{
+            if cevap == true{
+                var mesajId = self.icerikLink
+                mesajId = mesajId.replacingOccurrences(of: "/mesaj/", with: "")
+                let parameters: Parameters = [
+                    "Message": "\(inputBar.inputTextView.text!)",
+                    "IsReply": "\(cevap)",
+                    "ThreadId": "\(mesajId)",
+                    "__RequestVerificationToken": "\(token)",
+                    "To": "\(self.baslik)"]
+                
+                DispatchQueue.main.async {
+                    Alamofire.request("https://eksisozluk.com/mesaj/yolla",method: .post, parameters: parameters, headers: self.headers).responseString { response in
+                        if response.response?.statusCode == 404{
+                            CustomLoader.instance.hideLoaderView()
+                            let alert = UIAlertController(title: "hata", message: "böyle mesaj olmaz olsun", preferredStyle: .alert)
+                            alert.addAction(UIAlertAction(title: "üff tamam", style: .cancel, handler: nil))
+                            self.present(alert, animated: true)
+                        }else if response.result.isSuccess{
+                            self.inputBar.sendButton.stopAnimating()
+                            self.view.endEditing(true)
+                            self.siteyeBaglan()
+                            self.mesajView.reloadData()
+                        }else{
+                            let alert = UIAlertController(title: "hata", message: "bir şeyler oldu ama anlamadım. \nhata kodu: \(String(describing: response.response?.statusCode))", preferredStyle: .alert)
+                            alert.addAction(UIAlertAction(title: "peki tamam", style: .cancel, handler: nil))
+                            self.present(alert, animated: true)
+                            
+                        }
+                    }
+                }
+            }else{
+                let parameters: Parameters = [
+                    "__RequestVerificationToken": "\(ajaxToken)",
+                    "To": "\(self.baslik)",
+                    "Message": "\(inputBar.inputTextView.text!)"]
+                
+                CustomLoader.instance.showLoaderView()
+                DispatchQueue.main.async {
+                    Alamofire.request("https://eksisozluk.com/mesaj/sendajax",method: .post, parameters: parameters, headers: self.headers).responseString { response in
+                        print(response.response.debugDescription)
+                        print(response.response?.statusCode)
+                        if response.response?.statusCode == 404{
+                            CustomLoader.instance.hideLoaderView()
+                            let alert = UIAlertController(title: "hata", message: "böyle mesaj olmaz olsun", preferredStyle: .alert)
+                            alert.addAction(UIAlertAction(title: "üff tamam", style: .cancel, handler: nil))
+                            self.present(alert, animated: true)
+                        }else if response.result.isSuccess{
+                            CustomLoader.instance.hideLoaderView()
+                            self.view.endEditing(true)
+                            self.navigationController?.popViewController(animated: true)
+                        }else{
+                            let alert = UIAlertController(title: "hata", message: "bir şeyler oldu ama anlamadım. \nhata kodu: \(String(describing: response.response?.statusCode))", preferredStyle: .alert)
+                            alert.addAction(UIAlertAction(title: "peki tamam", style: .cancel, handler: nil))
+                            self.present(alert, animated: true)
+                            
+                        }
+                    }
+                }
+            }
+        }
+    }
     
     
     var refreshView: RefreshView!
@@ -100,6 +333,25 @@ class mesajIcerikViewController: UIViewController, UITextViewDelegate,UITableVie
     private func loadData() {
         DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(20)) {
             self.mesajView.reloadData()
+        }
+    }
+    func requestToken(html: String) -> Void {
+        if let doc = try? Kanna.HTML(html: html, encoding: String.Encoding.utf8){
+            for basliklar in doc.css("input[name^=__RequestVerificationToken]"){
+                token = basliklar["value"]!
+                print(token)
+            }
+        }
+    }
+    var ajaxToken = ""
+    func baslikrequestToken(html: String) -> Void {
+        if let doc = try? Kanna.HTML(html: html, encoding: String.Encoding.utf8){
+            for basliklar in doc.css("form[id^=message-send-form]"){
+                let tok = basliklar.at_css("input[name^=__RequestVerificationToken]")
+                ajaxToken = tok!["value"]!
+                print(basliklar.text)
+                print(ajaxToken)
+            }
         }
     }
     @objc func refreshTableView() {
@@ -185,6 +437,8 @@ class mesajIcerikViewController: UIViewController, UITextViewDelegate,UITableVie
                 self.kullaniciGetir(html: html)
                 self.tarihGetir(html: html)
                 self.mesajSayisiGetir(html: html)
+                self.requestToken(html: html)
+                self.baslikrequestToken(html: html)
                 self.scrollToBottom()
             }
             if response.result.isSuccess == false{

@@ -193,7 +193,7 @@ class TemaViewController: UIViewController, UIPickerViewDelegate, UIPickerViewDa
         if temaButton.selectedSegmentIndex == 2{
             Theme.klasikTheme()
             UserDefaults.standard.set(2, forKey: "secilenTema")
-            changeIcon(to: "AlternateIcon")
+            changeIcon(to: "AlternatePembe")
             let vc = self.storyboard?.instantiateViewController(withIdentifier: "basla") as! UITabBarController
             self.setNeedsStatusBarAppearanceUpdate()
             UIApplication.shared.keyWindow?.rootViewController = vc
@@ -244,7 +244,7 @@ class TemaViewController: UIViewController, UIPickerViewDelegate, UIPickerViewDa
                     self.present(tempVC, animated: false, completion: {
                         tempVC.dismiss(animated: false, completion: nil)
                     })
-                    print("App icon changed successfully")
+                    print("Uygulama simgesi başarıyla değiştirildi.")
                 }
             })
         } else {

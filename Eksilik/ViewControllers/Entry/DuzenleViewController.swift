@@ -25,11 +25,12 @@ class DuzenleViewController: UIViewController, UITextViewDelegate {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        siteyeBaglan()
         tabBarController?.tabBar.installBlurEffect()
         self.navigationController?.navigationBar.installBlurEffect()
         let entryToolbar = UIToolbar(frame:CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width, height: 50))
         entryToolbar.barStyle = Theme.barStyle!
-        entryToolbar.tintColor = Theme.userColor
+        entryToolbar.tintColor = Theme.userColor ?? .darkGray
         UIBarButtonItem().setTitleTextAttributes([NSAttributedString.Key.font : UIFont(name: font!, size: 12.0)!], for: .normal)
         entryToolbar.items = [
             UIBarButtonItem(title: "(bkz:)", style: .plain, target: self, action: #selector(bkz)),
@@ -41,7 +42,6 @@ class DuzenleViewController: UIViewController, UITextViewDelegate {
             UIBarButtonItem(title: "http://", style: .plain, target: self, action: #selector(link))]
         entryToolbar.sizeToFit()
         entryGir.inputAccessoryView = entryToolbar
-        siteyeBaglan()
         entryGir.layer.cornerRadius = 20
         entryGir.layer.borderColor = Theme.userColor?.cgColor
         entryGir.layer.borderWidth = 0.5
@@ -186,7 +186,6 @@ class DuzenleViewController: UIViewController, UITextViewDelegate {
             "ReturnUrl": "\(returnURL)",
             "Id": "#\(entryNo)",
             "__RequestVerificationToken": "\(token)"
-            
         ]
         CustomLoader.instance.showLoaderView()
         let viewController = self.storyboard?.instantiateViewController(withIdentifier: "entryGoruntule") as! EntryViewController

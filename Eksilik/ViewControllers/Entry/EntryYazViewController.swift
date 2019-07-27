@@ -9,9 +9,8 @@
 import UIKit
 import Alamofire
 import Kanna
-import GrowingTextView
-
-class EntryYazViewController: UIViewController, GrowingTextViewDelegate {
+import SwiftRater
+class EntryYazViewController: UIViewController, UITextViewDelegate{
     var token = ""
     var returnURL = ""
     var Title = ""
@@ -23,7 +22,7 @@ class EntryYazViewController: UIViewController, GrowingTextViewDelegate {
     @IBOutlet weak var baslikLabel: UILabel!
     let headers: HTTPHeaders = [ "X-Requested-With": "XMLHttpRequest"]
     let font = UserDefaults.standard.string(forKey: "secilenFont")
-    let entryGir = GrowingTextView()
+    let entryGir = UITextView()
 
     override func viewWillAppear(_ animated: Bool) {
         self.tabBarController!.tabBar.layer.zPosition = -1
@@ -34,7 +33,6 @@ class EntryYazViewController: UIViewController, GrowingTextViewDelegate {
     }
     override func viewDidLoad() {
         super.viewDidLoad()
-        print(baslikLinki)
         tabBarController?.tabBar.installBlurEffect()
         self.navigationController?.navigationBar.installBlurEffect()
         self.navigationItem.rightBarButtonItem = UIBarButtonItem(title: "gönder", style: .done, target: self, action: #selector(gonder))
@@ -52,19 +50,23 @@ class EntryYazViewController: UIViewController, GrowingTextViewDelegate {
             UIBarButtonItem(title: "-spoiler-", style: .plain, target: self, action: #selector(spoiler)),
             UIBarButtonItem(title: "http://", style: .plain, target: self, action: #selector(link))]
         entryToolbar.sizeToFit()
-        entryGir.inputAccessoryView = entryToolbar
+        DispatchQueue.main.async {
+            self.entryGir.layer.cornerRadius = 20
+            self.entryGir.layer.borderColor = Theme.userColor?.cgColor
+            self.entryGir.layer.borderWidth = 0.5
+            self.entryGir.font = .systemFont(ofSize: 16)
+            self.entryGir.inputAccessoryView = entryToolbar
+            self.entryGir.backgroundColor = Theme.backgroundColor
+            self.entryGir.contentInset = UIEdgeInsets(top: 15, left: 5, bottom: 0, right: 5)
+            self.entryGir.textColor = Theme.labelColor
+        }
         siteyeBaglan()
-        entryGir.layer.cornerRadius = 20
-        entryGir.layer.borderColor = Theme.userColor?.cgColor
-        entryGir.layer.borderWidth = 0.5
-        entryGir.font = .systemFont(ofSize: 16)
+
         let blurView = UIVisualEffectView()
         blurView.frame = view.frame
         blurView.effect = Theme.blurEffect
         view.backgroundColor = Theme.backgroundColor
-        entryGir.backgroundColor = Theme.backgroundColor
-        entryGir.contentInset = UIEdgeInsets(top: 15, left: 5, bottom: 0, right: 5)
-        entryGir.textColor = Theme.labelColor
+
         entryGir.delegate = self
         let nvHeight = navigationController?.navigationBar.frame.height
         let stHeight = UIApplication.shared.statusBarFrame.height
@@ -182,6 +184,7 @@ class EntryYazViewController: UIViewController, GrowingTextViewDelegate {
 
     @IBAction func gonderButton(_ sender: Any) {
         gonder()
+        SwiftRater.incrementSignificantUsageCount()
         self.view.endEditing(true)
         }
     

@@ -50,7 +50,7 @@ class AraViewController: UIViewController, UITableViewDelegate, UITableViewDataS
         resultSearchController = ({
             let controller = UISearchController(searchResultsController: nil)
             controller.searchBar.barStyle = Theme.barStyle!
-            controller.searchBar.tintColor = Theme.labelColor
+            controller.searchBar.tintColor = Theme.entryButton
             controller.searchResultsUpdater = self
             controller.dimsBackgroundDuringPresentation = false
             self.definesPresentationContext = true

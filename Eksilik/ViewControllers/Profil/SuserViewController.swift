@@ -33,6 +33,17 @@ class SuserViewController: UIViewController, UITableViewDelegate, UITableViewDat
     var oneCikanLink = String()
     let font = UserDefaults.standard.string(forKey: "secilenFont")
     var puntosecim = 15
+    var takip = String()
+    var engel = String()
+    var baslikEngel = String()
+    
+    var followLink = String()
+    var unfollowLink = String()
+    var blockLink = String()
+    var unblockLink = String()
+    var blockTitleLink = String()
+    var unblockTitleLink = String()
+    
     func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
         return array.count
     }
@@ -77,6 +88,66 @@ class SuserViewController: UIViewController, UITableViewDelegate, UITableViewDat
         return cell
     }
 
+    
+    @IBAction func suserMore(_ sender: Any) {
+        let alert = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+        if durum.count <= 1 {
+            alert.addAction(UIAlertAction(title: (durum[0] ? cikarBaslik[0] : ekleBaslik[0]), style: .default, handler: { (UIAlertAction) in
+            Alamofire.request("https://eksisozluk.com/\(self.durum[0] ? self.cikarLink[0]: self.kisiLinkler[0])",method: .post, headers: self.headers).responseString {
+                response in
+                if response.result.isSuccess == true{
+                    self.view.makeToast("\(self.durum[0] ? self.cikarBaslik[0] : self.ekleBaslik[0]) işlemi çok da güzel oldu")
+                    self.bilgiCek()
+                    self.entryList.reloadData()
+                }
+            }
+            }))
+        }else if durum.count>1{
+            alert.addAction(UIAlertAction(title: (durum[0] ? cikarBaslik[0] : ekleBaslik[0]), style: .default, handler: { (UIAlertAction) in
+                Alamofire.request("https://eksisozluk.com/\(self.durum[0] ? self.cikarLink[0]: self.kisiLinkler[0])",method: .post, headers: self.headers).responseString {
+                    response in
+                    if response.result.isSuccess == true{
+                        self.view.makeToast("\(self.durum[0] ? self.cikarBaslik[0] : self.ekleBaslik[0]) işlemi çok da güzel oldu")
+                        self.bilgiCek()
+                        self.entryList.reloadData()
+                    }
+                }
+            }))
+        alert.addAction(UIAlertAction(title: (durum[1] ? cikarBaslik[1] : ekleBaslik[1]), style: .default, handler: { (UIAlertAction) in
+            Alamofire.request("https://eksisozluk.com/\(self.durum[1] ? self.cikarLink[1]: self.kisiLinkler[1])",method: .post, headers: self.headers).responseString {
+                response in
+                if response.result.isSuccess == true{
+                    self.view.makeToast("\(self.durum[1] ? self.cikarBaslik[1] : self.ekleBaslik[1]) işlemi çok da güzel oldu")
+                    self.bilgiCek()
+                    self.entryList.reloadData()
+                }
+            }
+        }))
+            if durum.count>2{
+        alert.addAction(UIAlertAction(title: (durum[2] ? cikarBaslik[2] : ekleBaslik[2]), style: .default, handler: { (UIAlertAction) in
+                Alamofire.request("https://eksisozluk.com/\(self.durum[2] ? self.cikarLink[2]: self.kisiLinkler[2])",method: .post, headers: self.headers).responseString {
+                    response in
+                    if response.result.isSuccess == true{
+                        self.view.makeToast("\(self.durum[2] ? self.cikarBaslik[2] : self.ekleBaslik[2]) işlemi çok da güzel oldu")
+                        self.bilgiCek()
+                        self.entryList.reloadData()
+                    }
+                }
+            }))
+            }
+        }
+        alert.addAction(UIAlertAction(title: "vazgeç", style: .cancel, handler: { (UIAlertAction) in
+            self.dismiss(animated: true, completion: nil)
+        }))
+        
+        alert.view.tintColor = Theme.entryButton
+        alert.view.layer.cornerRadius = 25
+        alert.view.layer.borderColor = Theme.entryButton?.cgColor
+        alert.view.layer.borderWidth = 0
+        
+        self.present(alert, animated: true)
+    }
+    
     @IBOutlet var istatistikLabel: UILabel!
 
     @IBOutlet var oneCikanBaslik: UILabel!
@@ -104,6 +175,38 @@ class SuserViewController: UIViewController, UITableViewDelegate, UITableViewDat
         self.view.addSubview(barAccessory)
         
     }
+    
+    private var finishedLoadingInitialTableCells = false
+    
+    func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+        
+        var lastInitialDisplayableCell = false
+        
+        //change flag as soon as last displayable cell is being loaded (which will mean table has initially loaded)
+        if entryNo.count > 0 && !finishedLoadingInitialTableCells {
+            if let indexPathsForVisibleRows = tableView.indexPathsForVisibleRows,
+                let lastIndexPath = indexPathsForVisibleRows.last, lastIndexPath.row == indexPath.row {
+                lastInitialDisplayableCell = true
+            }
+        }
+        
+        if !finishedLoadingInitialTableCells {
+            
+            if lastInitialDisplayableCell {
+                finishedLoadingInitialTableCells = true
+            }
+            
+            //animates the cell as it is being displayed for the first time
+            cell.transform = CGAffineTransform(translationX: 0, y: entryList.rowHeight/2)
+            cell.alpha = 0
+            
+            UIView.animate(withDuration: 0.5, delay: 0.05*Double(indexPath.row), options: [.curveEaseInOut], animations: {
+                cell.transform = CGAffineTransform(translationX: 0, y: 0)
+                cell.alpha = 1
+            }, completion: nil)
+        }
+    }
+    
     @IBAction func vazgec(_ sender: Any) {
         pickerView.isHidden = true
         barAccessory.isHidden = true
@@ -119,12 +222,17 @@ class SuserViewController: UIViewController, UITableViewDelegate, UITableViewDat
     }
     
     @IBOutlet var okImage: UIImageView!
+    let status = UserDefaults.standard.bool(forKey: "giris")
 
     
 
     override func viewDidLoad() {
         super.viewDidLoad()
         CustomLoader.instance.showLoaderView()
+        self.oneCikanEntry.alpha = 0
+        self.oneCikanTarih.alpha = 0
+        self.istatistikLabel.alpha = 0
+        self.oneCikanBaslik.alpha = 0
         self.navigationController?.hidesBottomBarWhenPushed = true
         self.navigationController?.navigationBar.installBlurEffect()
         puntosecim = UserDefaults.standard.integer(forKey: "secilenPunto")
@@ -134,6 +242,9 @@ class SuserViewController: UIViewController, UITableViewDelegate, UITableViewDat
             registerForPreviewing(with: self, sourceView: entryList)
         }
         
+        if status == false{
+            self.navigationController?.navigationItem.rightBarButtonItem = nil
+        }
         self.oneCikanBaslik.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(linkeGit)))
         self.oneCikanEntry.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(linkeGit)))
         
@@ -261,6 +372,9 @@ class SuserViewController: UIViewController, UITableViewDelegate, UITableViewDat
                 self.entryleriGetir(html: html)
                 self.olayKontrol(html: html)
                 self.mesajKontrol(html: html)
+                if (self.status){
+                self.suserKontrol(html: html)
+                }
                 CustomLoader.instance.hideLoaderView()
             }
         }
@@ -300,6 +414,34 @@ class SuserViewController: UIViewController, UITableViewDelegate, UITableViewDat
             }
         }
     }
+    var engelli = String()
+    var baslikEngelli = String()
+    var durum = [Bool]()
+    var kisiLinkler = [String]()
+    var cikarLink = [String]()
+    var ekleBaslik = [String]()
+    var cikarBaslik = [String]()
+    func suserKontrol(html: String) -> Void {
+        if let doc = try? Kanna.HTML(html: html, encoding: String.Encoding.utf8){
+             durum = [Bool]()
+             kisiLinkler = [String]()
+             cikarLink = [String]()
+             ekleBaslik = [String]()
+             cikarBaslik = [String]()
+            for sayfa in doc.css("div[class^=sub-title-menu profile-buttons] a"){
+                ekleBaslik.append(sayfa["data-add-caption"] ?? "nil")
+                cikarBaslik.append(sayfa["data-remove-caption"] ?? "nil")
+                durum.append((sayfa["data-added"]?.boolValue()) ?? false)
+                kisiLinkler.append(sayfa["data-add-url"] ?? "nil")
+                cikarLink.append(sayfa["data-remove-url"] ?? "nil")
+            }
+            baslik.removeLast()
+            durum.removeLast()
+            kisiLinkler.removeLast()
+            cikarLink.removeLast()
+        }
+        print(durum)
+    }
     func olayKontrol(html: String) -> Void {
         if let doc = try? Kanna.HTML(html: html, encoding: String.Encoding.utf8){
             for sayfa in doc.css("li[class^=tracked mobile-only] a svg"){
@@ -316,15 +458,18 @@ class SuserViewController: UIViewController, UITableViewDelegate, UITableViewDat
     
     func kullaniciBilgi(html: String) -> Void {
         if let doc = try? Kanna.HTML(html: html, encoding: String.Encoding.utf8){
+            if sonIstatistik.count == 0{
             for kullaniciBilgi in doc.css("ul[id^=user-entry-stats] li"){
                 let k =  kullaniciBilgi.content
                 //  k = k!.replacingOccurrences(of: " ", with: "")
                 self.sonIstatistik.append("• \(k!.html2String)   •")
                 self.sonIstatistik.removeLast()
                 self.istatistikLabel.text = sonIstatistik
+                }
             }
         }
     }
+    
     func kullaniciAdi(html: String) -> Void {
         if let doc = try? Kanna.HTML(html: html, encoding: String.Encoding.utf8){
             for kullaniciBilgi in doc.css("h1[data-nick] a"){
@@ -381,6 +526,15 @@ class SuserViewController: UIViewController, UITableViewDelegate, UITableViewDat
     }
     
     func entryleriGetir(html: String) -> Void {
+        UIView.animate(withDuration: 1, delay: 0, options: .curveLinear, animations: {
+            self.oneCikanEntry.alpha = 1
+            self.oneCikanTarih.alpha = 1
+            self.istatistikLabel.alpha = 1
+            self.oneCikanBaslik.alpha = 1
+            
+        }, completion: { finished in
+            print("Animation completed")
+        })
         if let doc = try? Kanna.HTML(html: html, encoding: String.Encoding.utf8){
             let k = doc.css("p")
             for caylak in k{
@@ -416,4 +570,19 @@ class suserViewCell:UITableViewCell{
     
     @IBOutlet var entryNoLabel: UILabel!
     
+}
+
+extension String {
+    func boolValue() -> Bool? {
+        let lowercaseSelf = self.lowercased()
+        
+        switch lowercaseSelf {
+        case "true", "yes", "1":
+            return true
+        case "false", "no", "0":
+            return false
+        default:
+            return nil
+        }
+    }
 }

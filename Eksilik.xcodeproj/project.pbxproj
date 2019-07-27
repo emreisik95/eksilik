@@ -56,6 +56,7 @@
 		35F2803B226381E500EDE7F7 /* UIView+constraints.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35F2803A226381E500EDE7F7 /* UIView+constraints.swift */; };
 		35F280412263D5FC00EDE7F7 /* olayViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35F280402263D5FB00EDE7F7 /* olayViewController.swift */; };
 		35F280432263D68100EDE7F7 /* mesajlListeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35F280422263D68100EDE7F7 /* mesajlListeViewController.swift */; };
+		35F7127222E7A708002DBBF4 /* iMessageInputBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35F7127122E7A708002DBBF4 /* iMessageInputBar.swift */; };
 		35F85575221AD88E00F55E0A /* MesajViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35F85574221AD88E00F55E0A /* MesajViewController.swift */; };
 		35FD00E7226FA31200B359E8 /* TemaViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35FD00E6226FA31200B359E8 /* TemaViewController.swift */; };
 		35FD00ED2270492100B359E8 /* RastgeleViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35FD00EC2270492100B359E8 /* RastgeleViewController.swift */; };
@@ -155,6 +156,7 @@
 		35F2803A226381E500EDE7F7 /* UIView+constraints.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "UIView+constraints.swift"; sourceTree = "<group>"; };
 		35F280402263D5FB00EDE7F7 /* olayViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = olayViewController.swift; path = Eksilik/ViewControllers/Olay/olayViewController.swift; sourceTree = SOURCE_ROOT; };
 		35F280422263D68100EDE7F7 /* mesajlListeViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = mesajlListeViewController.swift; sourceTree = "<group>"; };
+		35F7127122E7A708002DBBF4 /* iMessageInputBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iMessageInputBar.swift; sourceTree = "<group>"; };
 		35F85574221AD88E00F55E0A /* MesajViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MesajViewController.swift; sourceTree = "<group>"; };
 		35FD00E6226FA31200B359E8 /* TemaViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TemaViewController.swift; sourceTree = "<group>"; };
 		35FD00EC2270492100B359E8 /* RastgeleViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = RastgeleViewController.swift; path = "Eksilik/ViewControllers/Giriş/RastgeleViewController.swift"; sourceTree = SOURCE_ROOT; };
@@ -219,6 +221,7 @@
 			children = (
 				3517141F226B575D0078C2DC /* mesajYazViewController.swift */,
 				355D8CB1226A385600E0B358 /* mesajIcerikViewController.swift */,
+				35F7127122E7A708002DBBF4 /* iMessageInputBar.swift */,
 				35F85574221AD88E00F55E0A /* MesajViewController.swift */,
 				35F280422263D68100EDE7F7 /* mesajlListeViewController.swift */,
 			);
@@ -706,6 +709,7 @@
 				35F280412263D5FC00EDE7F7 /* olayViewController.swift in Sources */,
 				3522800922737AB80039E50C /* basliklariEngelleViewController.swift in Sources */,
 				350EA2AA224AC7B80016EE14 /* tBugunViewController.swift in Sources */,
+				35F7127222E7A708002DBBF4 /* iMessageInputBar.swift in Sources */,
 				35F2803B226381E500EDE7F7 /* UIView+constraints.swift in Sources */,
 				3516F024226627FB00533435 /* DuzenleViewController.swift in Sources */,
 				35BEFD1A225A8FD0001D545E /* tema.swift in Sources */,
@@ -781,7 +785,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.0.7.1;
+				MARKETING_VERSION = 1.0.9;
 				PRODUCT_BUNDLE_IDENTIFIER = emre.isik.Eksilik.gundem;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -804,7 +808,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.0.7.1;
+				MARKETING_VERSION = 1.0.9;
 				PRODUCT_BUNDLE_IDENTIFIER = emre.isik.Eksilik.gundem;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -947,7 +951,7 @@
 					"@executable_path/Frameworks",
 				);
 				MACH_O_TYPE = mh_execute;
-				MARKETING_VERSION = 1.0.7.1;
+				MARKETING_VERSION = 1.0.9;
 				PRODUCT_BUNDLE_IDENTIFIER = emre.isik.Eksilik;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -973,7 +977,7 @@
 					"@executable_path/Frameworks",
 				);
 				MACH_O_TYPE = mh_execute;
-				MARKETING_VERSION = 1.0.7.1;
+				MARKETING_VERSION = 1.0.9;
 				PRODUCT_BUNDLE_IDENTIFIER = emre.isik.Eksilik;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";

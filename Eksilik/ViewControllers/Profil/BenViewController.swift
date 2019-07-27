@@ -149,7 +149,10 @@ class BenViewController: UIViewController, UITableViewDelegate, UITableViewDataS
         super.viewDidLoad()
         CustomLoader.instance.showLoaderView()
         entryList.contentInset = UIEdgeInsets(top: 5, left: 0, bottom:40, right: 0);
-        
+        self.oneCikanEntry.alpha = 0
+        self.oneCikanTarih.alpha = 0
+        self.istatistikLabel.alpha = 0
+        self.oneCikanBaslik.alpha = 0
         let tapGestureRecognizer = UITapGestureRecognizer(target:self, action: #selector(biriBaslik(_:)))
         self.navigationController?.navigationBar.addGestureRecognizer(tapGestureRecognizer)
         puntosecim = UserDefaults.standard.integer(forKey: "secilenPunto")
@@ -187,6 +190,38 @@ class BenViewController: UIViewController, UITableViewDelegate, UITableViewDataS
         self.pickerView.frame = CGRect(x: 0, y: UIScreen.main.bounds.height - 320, width: UIScreen.main.bounds.width, height: 320)
         secti = 0
     }
+    
+    private var finishedLoadingInitialTableCells = false
+    
+    func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+        
+        var lastInitialDisplayableCell = false
+        
+        //change flag as soon as last displayable cell is being loaded (which will mean table has initially loaded)
+        if entryNo.count > 0 && !finishedLoadingInitialTableCells {
+            if let indexPathsForVisibleRows = tableView.indexPathsForVisibleRows,
+                let lastIndexPath = indexPathsForVisibleRows.last, lastIndexPath.row == indexPath.row {
+                lastInitialDisplayableCell = true
+            }
+        }
+        
+        if !finishedLoadingInitialTableCells {
+            
+            if lastInitialDisplayableCell {
+                finishedLoadingInitialTableCells = true
+            }
+            
+            //animates the cell as it is being displayed for the first time
+            cell.transform = CGAffineTransform(translationX: 0, y: entryList.rowHeight/2)
+            cell.alpha = 0
+            
+            UIView.animate(withDuration: 0.5, delay: 0.05*Double(indexPath.row), options: [.curveEaseInOut], animations: {
+                cell.transform = CGAffineTransform(translationX: 0, y: 0)
+                cell.alpha = 1
+            }, completion: nil)
+        }
+    }
+    
     
     @objc func linkeGit(){
         let vc =
@@ -343,7 +378,8 @@ class BenViewController: UIViewController, UITableViewDelegate, UITableViewDataS
                     tabBarController?.tabBar.items?.last!.badgeValue = "mesaj"
                     tabBarController?.tabBar.items?.last!.badgeColor = Theme.userColor
                 }else{
-                    tabBarController?.tabBar.items?.last!.badgeValue = nil
+                    tabBarController?.tabBar.items?.last!.badgeValue = ""
+                    tabBarController?.tabBar.items?.last!.badgeColor = .clear
                 }
             }
         }
@@ -484,11 +520,22 @@ func kullanici(html: String) -> Void {
     }
     
     func entryleriGetir(html: String) -> Void {
+        UIView.animate(withDuration: 1, delay: 0, options: .curveLinear, animations: {
+            self.oneCikanEntry.alpha = 1
+            self.oneCikanTarih.alpha = 1
+            self.istatistikLabel.alpha = 1
+            self.oneCikanBaslik.alpha = 1
+            
+        }, completion: { finished in
+            print("Animation completed")
+        })
         if let doc = try? Kanna.HTML(html: html, encoding: String.Encoding.utf8){
             let k = doc.css("p")
             for caylak in k{
                 var e = caylak.toHTML
                 e?.append(contentsOf: "<style>body{font-weight:200; font-size:15px; font-family:'\(font ?? "Helvetica-Light")', sans-serif} a{text-decoration:none} #read-all{display:none;}</style>")
+                self.oneCikanEntry.attributedText = e?.html2AttributedString
+                self.oneCikanEntry.textColor = Theme.labelColor
             }
             for entryIcerik in doc.css("div[class^=content]"){
                 var entry = entryIcerik.toHTML

@@ -66,7 +66,8 @@ class FirstViewController: UIViewController ,UITableViewDelegate, UITableViewDat
         }
     }
     override func viewWillAppear(_ animated: Bool) {
-    SwiftRater.check()
+        SwiftRater.check(host: self)
+
        puntosecim = UserDefaults.standard.integer(forKey: "secilenPunto")
     }
     override func viewDidAppear(_ animated: Bool) {
@@ -75,6 +76,11 @@ class FirstViewController: UIViewController ,UITableViewDelegate, UITableViewDat
             let whatsNew = WhatsNewViewController(items: [
                 WhatsNewItem.text(title: "twitter linkleri için düzenleme", subtitle: "artık twitter linkleri telefonunuzda twitter uygulaması yüklüyse direkt uygulamadan açılacak. (linkler  uygulama içinde açılsın seçeneği aktif olduğunda geçerlidir)"),
                 WhatsNewItem.text(title: "öne çıkan entry", subtitle: "profilinizdeki veya herhangi bir suser'ın profilindeki öne çıkan entry'e basınca direkt olarak başlığa yönleneceksiniz"),
+                WhatsNewItem.text(title: "çaylak onay listesi", subtitle: "çaylakların profil sayfasına girdiklerinde sıralamada kaçıncı olduklarını görmelerine engel olan hata giderildi"),
+                WhatsNewItem.text(title: "profil seçenekleri", subtitle: "bir suser'ın profiline girdiğinizde sağ üstteki üç noktadan takip et, engelle, başlıklarını engelle gibi işlemleri yapabileceğiniz menü eklendi"),
+                WhatsNewItem.text(title: "klasik tema icon değişikliği", subtitle: "klasik temaya ruhuna uygun logo eklendi"),
+                WhatsNewItem.text(title: "birçok hata giderildi", subtitle: "uygulamanın kapanmasına neden olan birçok hata giderildi"),
+               WhatsNewItem.text(title: "çeşitli arayüz güncellemeleri", subtitle: "yeni geçişler, mesaj cevap verme arayüzündeki güncellemeler gibi ayarlar güncellendi."),
                 WhatsNewItem.text(title: "teşekkürler", subtitle: "uygulamayı her gün geliştirmeye çalışıyorum. eğer herhangi bir hatayla karşılaşırsanız ve istediğiniz ekstra bir özellik olursa lütfen sherlockun besinci sezonu'na mesaj gönderin.")
                 ])
             whatsNew.titleText = "neler yeni?"
@@ -171,7 +177,7 @@ class FirstViewController: UIViewController ,UITableViewDelegate, UITableViewDat
         resultSearchController = ({
             let controller = UISearchController(searchResultsController: nil)
             controller.searchBar.barStyle = Theme.barStyle ?? .black
-            controller.searchBar.tintColor = Theme.labelColor
+            controller.searchBar.tintColor = Theme.entryButton
             controller.searchResultsUpdater = self
             controller.dimsBackgroundDuringPresentation = false
             self.definesPresentationContext = true

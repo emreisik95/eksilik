@@ -22,6 +22,8 @@ pod 'GrowingTextView', '0.6.1'
 pod 'Fabric', '~> 1.10.2'
 pod 'Crashlytics', '~> 3.13.4'
 pod "SkeletonView"
+pod 'InputBarAccessoryView', '4.2.2'
+
 
 end
 

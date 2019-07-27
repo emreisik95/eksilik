@@ -72,6 +72,7 @@ PODS:
   - GoogleUtilities/UserDefaults (6.2.3):
     - GoogleUtilities/Logger
   - GrowingTextView (0.6.1)
+  - InputBarAccessoryView (4.2.2)
   - Kanna (4.0.3)
   - nanopb (0.3.901):
     - nanopb/decode (= 0.3.901)
@@ -96,6 +97,7 @@ DEPENDENCIES:
   - Firebase/InAppMessagingDisplay
   - Firebase/Messaging
   - GrowingTextView (= 0.6.1)
+  - InputBarAccessoryView (= 4.2.2)
   - Kanna (~> 4.0.0)
   - Parchment
   - ReadMoreTextView
@@ -122,6 +124,7 @@ SPEC REPOS:
     - GoogleAppMeasurement
     - GoogleUtilities
     - GrowingTextView
+    - InputBarAccessoryView
     - Kanna
     - nanopb
     - Parchment
@@ -149,6 +152,7 @@ SPEC CHECKSUMS:
   GoogleAppMeasurement: 1e45fa601e6280c180880d57010390f6679cd971
   GoogleUtilities: d2b0e277a95962e09bb27f5cd42f5f0b6a506c7d
   GrowingTextView: 335aefa45df7df06b01edede1363414d6ee5d6bc
+  InputBarAccessoryView: 2b937602598e2fab3149f37f51dd7ad795653812
   Kanna: 0ebbdd0e7e3308f0aafbd569e79c8cadc5eb877c
   nanopb: 2901f78ea1b7b4015c860c2fdd1ea2fee1a18d48
   Parchment: d3a7b367c529fa6ef51aa43f5717a7ff36d4b1f5
@@ -161,6 +165,6 @@ SPEC CHECKSUMS:
   Toast-Swift: 36f4720243c8582c2be243a60a51e193c761f541
   WhatsNew: d66a52b294e90d5bc133877e270ea7ce0b945003
 
-PODFILE CHECKSUM: fc96619991496b7d9929812256477a3181865e47
+PODFILE CHECKSUM: 64e29246f5367f81722f3ff6952f8fe906091ac7
 
 COCOAPODS: 1.7.1

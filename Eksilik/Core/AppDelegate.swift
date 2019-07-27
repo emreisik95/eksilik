@@ -101,9 +101,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CAAnimationDelegate {
         SwiftRater.showLaterButton = true
         SwiftRater.debugMode = false
         SwiftRater.alertTitle = "uygulamayı beğendiniz mi?"
-        SwiftRater.alertMessage = "eğer beğendiyseniz app store'da oy vermeyi unutmayın"
+        SwiftRater.alertMessage = "uygulamayı app store'da oylamak ister misiniz?"
         SwiftRater.alertCancelTitle = "yoo"
-        SwiftRater.alertRateTitle = "aynen"
+        SwiftRater.alertRateTitle = "olur"
         SwiftRater.alertRateLaterTitle = "sonra bakarız"
         SwiftRater.appLaunched()
         
