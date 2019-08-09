@@ -24,7 +24,9 @@ class mesajIcerikViewController: UIViewController, UITextViewDelegate,UITableVie
     var baslik = ""
     var token = ""
     var cevap = true
-    
+    var puntosecim = UserDefaults.standard.integer(forKey: "secilenPunto")
+    let font = UserDefaults.standard.string(forKey: "secilenFont")
+
     override func viewWillAppear(_ animated: Bool) {
         CustomLoader.instance.showLoaderView()
         siteyeBaglan()
@@ -403,6 +405,7 @@ class mesajIcerikViewController: UIViewController, UITextViewDelegate,UITableVie
             cell.gelenLabel.attributedText =  mesajlar[indexPath.row]
             cell.gelenLabel.tintColor = Theme.userColor!
             cell.tarihLabel.text = tarihler[indexPath.row]
+            cell.tarihLabel.textColor = .darkGray
             return cell
         }else{
             let cell = tableView.dequeueReusableCell(withIdentifier: "giden", for: indexPath) as! gidenCell
@@ -415,6 +418,7 @@ class mesajIcerikViewController: UIViewController, UITextViewDelegate,UITableVie
             cell.selectionStyle = .none
             cell.gidenLabel.tintColor = Theme.userColor!
             cell.tarihLabel.text = tarihler[indexPath.row]
+            cell.tarihLabel.textColor = .darkGray
             return cell
         }
         return UITableViewCell()
@@ -468,7 +472,7 @@ class mesajIcerikViewController: UIViewController, UITextViewDelegate,UITableVie
         if let doc = try? Kanna.HTML(html: html, encoding: String.Encoding.utf8){
             for basliklar in doc.css("div[id^=message-thread] article p"){
                 var user = basliklar.toHTML!
-                user.append("<style>body{ font-size:15px; font-family:Helvetica, sans-serif} mark{background-color:#616161;}a{text-decoration:none}</style>")
+                user.append("<style>body{ font-size:\(puntosecim)px; font-family:\(font!)} mark{background-color:#616161;}a{text-decoration:none}</style>")
                 self.mesajlar.append(user.html2AttributedString!)
                 if basliklar.parent?.className == "incoming"{
                     self.gelen.append(false)

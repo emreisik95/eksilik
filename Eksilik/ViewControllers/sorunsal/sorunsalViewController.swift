@@ -93,7 +93,6 @@ class sorunsalViewController: UIViewController, UITableViewDataSource, UITableVi
     @IBAction func takipSecenek(_ sender: Any) {
         if secenekControl.selectedSegmentIndex == 0{
             CustomLoader.instance.showLoaderView()
-            navigationController?.navigationBar.topItem?.title = "sorunsallar - gündem"
             self.takipLink = "https://eksisozluk.com/basliklar/m/sorunsal"
             self.yazarlar = [String]()
             self.basliklar = [String]()
@@ -104,7 +103,6 @@ class sorunsalViewController: UIViewController, UITableViewDataSource, UITableVi
         }
         if secenekControl.selectedSegmentIndex == 1{
             CustomLoader.instance.showLoaderView()
-            navigationController?.navigationBar.topItem?.title = "sorun - bugün"
             self.takipLink = "https://eksisozluk.com/basliklar/m/sorunsal-bugun"
             self.yazarlar = [String]()
             self.basliklar = [String]()
@@ -171,10 +169,10 @@ class sorunsalViewController: UIViewController, UITableViewDataSource, UITableVi
             for sayfa in doc.css("li[class^=messages mobile-only] a svg"){
                 let olayTuru = sayfa.className!
                 if olayTuru.contains("green"){
-                    tabBarController?.tabBar.items?.last!.badgeValue = "mesaj"
-                    tabBarController?.tabBar.items?.last!.badgeColor = Theme.userColor
+                    tabBarController?.tabBar.items?[2].badgeValue = "mesaj"
+                    tabBarController?.tabBar.items?[2].badgeColor = Theme.userColor
                 }else{
-                    tabBarController?.tabBar.items?.last!.badgeValue = nil
+                    tabBarController?.tabBar.items?[2].badgeValue = nil
                 }
             }
         }
@@ -184,10 +182,10 @@ class sorunsalViewController: UIViewController, UITableViewDataSource, UITableVi
             for sayfa in doc.css("li[class^=tracked mobile-only] a svg"){
                 let olayTuru = sayfa.className!
                 if olayTuru.contains("green"){
-                    tabBarController?.tabBar.items?[3].badgeValue = "olay"
-                    tabBarController?.tabBar.items?[3].badgeColor = Theme.userColor
+                    tabBarController?.tabBar.items?[2].badgeValue = "olay"
+                    tabBarController?.tabBar.items?[2].badgeColor = Theme.userColor
                 }else{
-                    tabBarController?.tabBar.items?[3].badgeValue = nil
+                    tabBarController?.tabBar.items?[2].badgeValue = nil
                 }
             }
         }

@@ -30,7 +30,7 @@ class AyarViewController: UIViewController, UITableViewDelegate, UITableViewData
         self.navigationController?.navigationBar.installBlurEffect()
         let nvHeight = navigationController?.navigationBar.frame.height
         let stHeight = UIApplication.shared.statusBarFrame.height
-        let adjustForTabbarInsets: UIEdgeInsets = UIEdgeInsets(top: nvHeight!-25, left: 0, bottom: self.tabBarController!.tabBar.frame.height, right: 0)
+        let adjustForTabbarInsets: UIEdgeInsets = UIEdgeInsets(top: 0, left: 0, bottom: self.tabBarController!.tabBar.frame.height, right: 0)
         ayarView.contentInset = adjustForTabbarInsets
         ayarView.scrollIndicatorInsets = adjustForTabbarInsets
         self.view.backgroundColor = Theme.backgroundColor
@@ -316,8 +316,8 @@ class AyarViewController: UIViewController, UITableViewDelegate, UITableViewData
             if response.result.isSuccess{
                 UserDefaults.standard.set(false, forKey: "giris")
                 let vc = self.storyboard?.instantiateViewController(withIdentifier: "basla") as! UITabBarController
-                vc.viewControllers?.remove(at: 4)
                 vc.viewControllers?.remove(at: 3)
+                vc.viewControllers?.remove(at: 2)
                 TarihPageViewController().viewDidLoad()
                 UIApplication.shared.keyWindow?.rootViewController = vc
             }

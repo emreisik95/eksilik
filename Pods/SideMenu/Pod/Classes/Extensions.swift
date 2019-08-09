@@ -46,9 +46,22 @@ internal extension UIViewController {
         }
     }
 
-    // Indicates if the menu is anywhere in the view hierarchy, even if covered by another view controller.
     @objc var isHidden: Bool {
         return presentingViewController == nil
+    }
+}
+
+internal extension UIGestureRecognizer {
+
+    convenience init(addTo view: UIView, target: Any, action: Selector) {
+        self.init()
+        addTarget(target, action: action)
+        view.addGestureRecognizer(self)
+    }
+
+    convenience init?(addTo view: UIView?, target: Any, action: Selector) {
+        guard let view = view else { return nil }
+        self.init(addTo: view, target: target, action: action)
     }
 }
 

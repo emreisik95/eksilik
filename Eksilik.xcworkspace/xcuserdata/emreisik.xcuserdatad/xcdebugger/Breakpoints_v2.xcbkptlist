@@ -3,4 +3,24 @@
    uuid = "E5E56F50-7196-415A-A482-8C54B508A990"
    type = "0"
    version = "2.0">
+   <Breakpoints>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "73C2E0F0-C834-45AF-9B79-D5050CF25304"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            condition = "(at:4)"
+            continueAfterRunningActions = "No"
+            filePath = "Eksilik/ViewControllers/Ayarlar/AyarViewController.swift"
+            timestampString = "586959028.136901"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "308"
+            endingLineNumber = "308"
+            landmarkName = "tableView(_:cellForRowAt:)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+   </Breakpoints>
 </Bucket>

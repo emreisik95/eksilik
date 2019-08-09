@@ -12,34 +12,34 @@ import UIKit
 
 struct Theme {
     
-    static var backgroundColor:UIColor?
-    static var cellFirstColor:UIColor?
-    static var cellSecondColor:UIColor?
-    static var navigationBarColor:UIColor?
-    static var labelColor:UIColor?
-    static var entrySayiColor:UIColor?
-    static var userColor:UIColor?
-    static var tarihColor:UIColor?
-    static var buttonBackgroundColor:UIColor?
-    static var tabBarColor:UIColor?
-    static var barStyle:UIBarStyle?
-    static var titleColor:UIColor?
-    static var entryYaziColor:String?
-    static var linkColor:UIColor?
-    static var separatorColor:UIColor?
-    static var keyboardColor:UIKeyboardAppearance?
-    static var blurEffect:UIBlurEffect?
-    static var ayarblurEffect:UIBlurEffect?
-    static var entryColor:UIColor?
-    static var statusBarStyle:UIStatusBarStyle?
-    static var yorumColor:UIColor?
-    static var okunmamis:UIColor?
-    static var okunmamisBaslik:UIColor?
-    static var bg:UIColor?
+    static var backgroundColor:UIColor!
+    static var cellFirstColor:UIColor!
+    static var cellSecondColor:UIColor!
+    static var navigationBarColor:UIColor!
+    static var labelColor:UIColor!
+    static var entrySayiColor:UIColor!
+    static var userColor:UIColor!
+    static var tarihColor:UIColor!
+    static var buttonBackgroundColor:UIColor!
+    static var tabBarColor:UIColor!
+    static var barStyle:UIBarStyle!
+    static var titleColor:UIColor!
+    static var entryYaziColor:String!
+    static var linkColor:UIColor!
+    static var separatorColor:UIColor!
+    static var keyboardColor:UIKeyboardAppearance!
+    static var blurEffect:UIBlurEffect!
+    static var ayarblurEffect:UIBlurEffect!
+    static var entryColor:UIColor!
+    static var statusBarStyle:UIStatusBarStyle!
+    static var yorumColor:UIColor!
+    static var okunmamis:UIColor!
+    static var okunmamisBaslik:UIColor!
+    static var bg:UIColor!
     static var wordList = UserDefaults.standard.stringArray(forKey: "engellenenler") ?? [String]()
-    static var menuColor:UIColor?
-    static var altBarStyle:UIBlurEffect?
-    static var entryButton:UIColor?
+    static var menuColor:UIColor!
+    static var altBarStyle:UIBlurEffect!
+    static var entryButton:UIColor!
     
     static public func defaultTheme() {
         backgroundColor = UIColor.init(red: 37/255, green: 37/255, blue: 37/255, alpha: 1)
@@ -127,26 +127,35 @@ struct Theme {
         menuColor = .darkGray
         bg = .black
         altBarStyle = .init(style: .light)
-        update()
+      update()
     }
-    static public func pembeTheme() {
-        backgroundColor = UIColor.init(red: 37/255, green: 37/255, blue: 37/255, alpha: 1)
-        cellFirstColor = UIColor.init(red: 28/255, green: 28/255, blue: 28/255, alpha: 1)
-        cellSecondColor = UIColor.init(red: 22/255, green: 22/255, blue: 22/255, alpha: 1)
-        navigationBarColor = UIColor.init(red: 28/255, green: 28/255, blue: 28/255, alpha: 1)
+    static public func twitterTheme() {
+        backgroundColor = UIColor.init(red: 23/255, green: 32/255, blue: 42/255, alpha: 1)
+        cellFirstColor = UIColor.init(red: 23/255, green: 32/255, blue: 42/255, alpha: 1)
+        cellSecondColor = UIColor.init(red: 23/255, green: 32/255, blue: 42/255, alpha: 1)
+        navigationBarColor = UIColor.init(red: 23/255, green: 32/255, blue: 42/255, alpha: 1)
         labelColor = .white
+        entryColor = .white
         tarihColor = .darkGray
-        userColor = UIColor.init(red: 180/255, green: 238/255, blue: 116/255, alpha: 1)
-        buttonBackgroundColor = UIColor.init(red: 131/255, green: 209/255, blue: 195, alpha: 1)
-        entrySayiColor = UIColor.init(red: 180/255, green: 238/255, blue: 116/255, alpha: 1)
-        tabBarColor = UIColor.init(red: 136/255, green: 202/255, blue: 64/255, alpha: 1)
+        userColor = UIColor.init(red: 76/255, green: 158/255, blue: 235/255, alpha: 1)
+        entryButton = UIColor.init(red: 76/255, green: 158/255, blue: 235/255, alpha: 1)
+        buttonBackgroundColor = UIColor.init(red: 76/255, green: 158/255, blue: 235/255, alpha: 1)
+        entrySayiColor = UIColor.init(red: 76/255, green: 158/255, blue: 235/255, alpha: 1)
+        tabBarColor = UIColor.init(red: 76/255, green: 158/255, blue: 235/255, alpha: 1)
         barStyle = .black
         titleColor = .white
-        linkColor = UIColor.init(red: 180/255, green: 238/255, blue: 116/255, alpha: 1)
+        linkColor = UIColor.init(red: 76/255, green: 158/255, blue: 235/255, alpha: 1)
         separatorColor = .black
         keyboardColor = .dark
         blurEffect = .init(style: .dark)
+        ayarblurEffect = .init(style: .dark)
         statusBarStyle = .lightContent
+        yorumColor = UIColor.init(red: 43/255, green: 52/255, blue: 62/255, alpha: 1)
+        okunmamis =  UIColor.init(red: 43/255, green: 52/255, blue: 62/255, alpha: 1)
+        okunmamisBaslik = UIColor.init(red: 43/255, green: 52/255, blue: 62/255, alpha: 1)
+        menuColor = .white
+        bg = UIColor.init(red: 23/255, green: 32/255, blue: 42/255, alpha: 1)
+        altBarStyle = .init(style: .dark)
         update()
     }
     static public func update(){

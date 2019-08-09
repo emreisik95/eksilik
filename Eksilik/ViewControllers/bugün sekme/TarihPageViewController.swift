@@ -77,32 +77,3 @@ class TarihPageViewController: UIViewController{
         return Theme.statusBarStyle!
     }
 }
-
-
-class CustomPagingView : PagingView {
-    override func setupConstraints() {
-        pageView.translatesAutoresizingMaskIntoConstraints = false
-        collectionView.translatesAutoresizingMaskIntoConstraints = false
-        
-        NSLayoutConstraint.activate([
-            pageView.leadingAnchor.constraint(equalTo: leadingAnchor),
-            pageView.trailingAnchor.constraint(equalTo: trailingAnchor),
-            pageView.topAnchor.constraint(equalTo: collectionView.topAnchor),
-            pageView.bottomAnchor.constraint(equalTo: bottomAnchor),
-            
-            collectionView.leadingAnchor.constraint(equalTo: leadingAnchor),
-            collectionView.trailingAnchor.constraint(equalTo: trailingAnchor),
-            collectionView.bottomAnchor.constraint(equalTo: bottomAnchor),
-            collectionView.heightAnchor.constraint(equalToConstant: options.menuItemSize.height),
-            ])
-    }
-}
-
-class CustomPagingViewController : FixedPagingViewController {
-    override func loadView() {
-        view = CustomPagingView(
-            options: options,
-            collectionView: collectionView,
-            pageView: pageViewController.view)
-    }
-}

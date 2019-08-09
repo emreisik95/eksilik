@@ -27,7 +27,7 @@ internal protocol UISideMenuNavigationControllerTransitionDelegate: class {
     func sideMenuTransitionDidDismiss(menu: Menu)
 }
 
-public struct SideMenuSettings: MenuModel {
+public struct SideMenuSettings: MenuModel, InitializableStruct {
     public var allowPushOfSameClassTwice: Bool = true
     public var alwaysAnimate: Bool = true
     public var animationOptions: UIView.AnimationOptions = .curveEaseInOut
@@ -39,7 +39,8 @@ public struct SideMenuSettings: MenuModel {
     public var dismissOnPush: Bool = true
     public var dismissOnRotation: Bool = true
     public var dismissWhenBackgrounded: Bool = true
-    public var enableSwipeGestures: Bool = true
+    public var enableSwipeToDismissGesture: Bool = true
+    public var enableTapToDismissGesture: Bool = true
     public var initialSpringVelocity: CGFloat = 1
     public var menuWidth: CGFloat = {
         let appScreenRect = UIApplication.shared.keyWindow?.bounds ?? UIWindow().bounds
@@ -55,11 +56,6 @@ public struct SideMenuSettings: MenuModel {
     public var usingSpringWithDamping: CGFloat = 1
 
     public init() {}
-
-    public init(_ block: (inout SideMenuSettings) -> Void) {
-        self.init()
-        block(&self)
-    }
 }
 
 internal typealias Menu = UISideMenuNavigationController
@@ -67,13 +63,13 @@ internal typealias Menu = UISideMenuNavigationController
 @objcMembers
 open class UISideMenuNavigationController: UINavigationController {
 
-    private enum PropertyName: String { case
-        leftSide
+    private lazy var _leftSide = Protected(false) { [weak self] oldValue, newValue in
+        guard self?.isHidden != false else {
+            Print.warning(.property, arguments: .leftSide, required: true)
+            return oldValue
+        }
+        return newValue
     }
-
-    private lazy var _leftSide = Protected(false,
-                                           if: { [weak self] _ in self?.isHidden != false },
-                                           else: { _ in Menu.elseCondition(.leftSide) } )
 
     private weak var _sideMenuManager: SideMenuManager?
     private weak var foundViewController: UIViewController?
@@ -87,7 +83,9 @@ open class UISideMenuNavigationController: UINavigationController {
     internal weak var sideMenuDelegate: UISideMenuNavigationControllerDelegate?
 
     /// The swipe to dismiss gesture.
-    private(set) weak var swipeToDismissGesture: UIPanGestureRecognizer? = nil
+    open private(set) weak var swipeToDismissGesture: UIPanGestureRecognizer? = nil
+    /// The tap to dismiss gesture.
+    open private(set) weak var tapToDismissGesture: UITapGestureRecognizer? = nil
 
     open var sideMenuManager: SideMenuManager {
         get { return _sideMenuManager ?? SideMenuManager.default }
@@ -106,7 +104,12 @@ open class UISideMenuNavigationController: UINavigationController {
     open var settings = SideMenuSettings() {
         didSet {
             setupBlur()
-            setupSwipeGestures()
+            if !enableSwipeToDismissGesture {
+                removeSwipeGesture()
+            }
+            if !enableTapToDismissGesture {
+                removeTapGesture()
+            }
         }
     }
 
@@ -162,24 +165,28 @@ open class UISideMenuNavigationController: UINavigationController {
     override open func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
 
+        defer {
+            activeDelegate?.sideMenuWillDisappear?(menu: self, animated: animated)
+        }
+
+        guard !isBeingDismissed else { return }
+
         // When presenting a view controller from the menu, the menu view gets moved into another transition view above our transition container
         // which can break the visual layout we had before. So, we move the menu view back to its original transition view to preserve it.
-        if dismissOnPresent && !isBeingDismissed {
-            // We're presenting a view controller from the menu, so we need to hide the menu so it isn't showing when the presented view is dismissed.
-            if let presentingView = presentingViewController?.view, let containerView = presentingView.superview {
-                containerView.addSubview(view)
-            }
+        if let presentingView = presentingViewController?.view, let containerView = presentingView.superview {
+            containerView.addSubview(view)
+        }
 
+        if dismissOnPresent {
+            // We're presenting a view controller from the menu, so we need to hide the menu so it isn't showing when the presented view is dismissed.
             transitionController?.transition(presenting: false, animated: animated, alongsideTransition: { [weak self] in
                 guard let self = self else { return }
                 self.activeDelegate?.sideMenuWillDisappear?(menu: self, animated: animated)
-            }, complete: false, completion: { [weak self] _ in
-                guard let self = self else { return }
-                self.activeDelegate?.sideMenuDidDisappear?(menu: self, animated: animated)
-                self.view.isHidden = true
+                }, complete: false, completion: { [weak self] _ in
+                    guard let self = self else { return }
+                    self.activeDelegate?.sideMenuDidDisappear?(menu: self, animated: animated)
+                    self.view.isHidden = true
             })
-        } else {
-            activeDelegate?.sideMenuWillDisappear?(menu: self, animated: animated)
         }
     }
 
@@ -204,11 +211,10 @@ open class UISideMenuNavigationController: UINavigationController {
 
         activeDelegate?.sideMenuDidDisappear?(menu: self, animated: animated)
 
-        if dismissOnPresent && !isBeingDismissed {
-            view.isHidden = true
-        } else {
+        if isBeingDismissed {
             transitionController = nil
-            interactive = false
+        } else if dismissOnPresent {
+            view.isHidden = true
         }
     }
     
@@ -235,15 +241,84 @@ open class UISideMenuNavigationController: UINavigationController {
             self.rotating = false
         }
     }
+
+    open override func viewWillLayoutSubviews() {
+        super.viewWillLayoutSubviews()
+        transitionController?.layout()
+    }
     
     override open func pushViewController(_ viewController: UIViewController, animated: Bool) {
-        let push = shouldPushViewController(viewController: viewController, animated: animated) { [weak self] _ in
-            self?.foundViewController = nil
+        guard viewControllers.count > 0 && pushStyle != .subMenu else {
+            // NOTE: pushViewController is called by init(rootViewController: UIViewController)
+            // so we must perform the normal super method in this case
+            return super.pushViewController(viewController, animated: animated)
         }
-        
-        if push {
-            super.pushViewController(viewController, animated: animated)
+
+        let splitViewController = presentingViewController as? UISplitViewController
+        let tabBarController = presentingViewController as? UITabBarController
+        let potentialNavigationController = (splitViewController?.viewControllers.first ?? tabBarController?.selectedViewController) ?? presentingViewController
+        guard let navigationController = potentialNavigationController as? UINavigationController else {
+            return Print.warning(.cannotPush, arguments: String(describing: potentialNavigationController.self), required: true)
         }
+
+        // To avoid overlapping dismiss & pop/push calls, create a transaction block where the menu
+        // is dismissed after showing the appropriate screen
+        CATransaction.begin()
+        defer { CATransaction.commit() }
+
+        if dismissOnPush {
+            let animated = animated || alwaysAnimate
+            if animated {
+                let areAnimationsEnabled = UIView.areAnimationsEnabled
+                UIView.setAnimationsEnabled(true)
+                transitionController?.transition(presenting: false, animated: animated, alongsideTransition: { [weak self] in
+                    guard let self = self else { return }
+                    self.activeDelegate?.sideMenuWillDisappear?(menu: self, animated: animated)
+                    }, completion: { [weak self] _ in
+                        guard let self = self else { return }
+                        self.activeDelegate?.sideMenuDidDisappear?(menu: self, animated: animated)
+                        self.dismiss(animated: false, completion: nil)
+                        self.foundViewController = nil
+                })
+                UIView.setAnimationsEnabled(areAnimationsEnabled)
+            }
+        }
+
+        if let lastViewController = navigationController.viewControllers.last,
+            !allowPushOfSameClassTwice && type(of: lastViewController) == type(of: viewController) {
+            return
+        }
+
+        switch pushStyle {
+        case .subMenu: return // handled earlier
+        case .default: break
+        case .popWhenPossible:
+            for subViewController in navigationController.viewControllers.reversed() {
+                if type(of: subViewController) == type(of: viewController) {
+                    navigationController.popToViewController(subViewController, animated: animated)
+                    return
+                }
+            }
+        case .preserve, .preserveAndHideBackButton:
+            var viewControllers = navigationController.viewControllers
+            let filtered = viewControllers.filter { preservedViewController in type(of: preservedViewController) == type(of: viewController) }
+            if let preservedViewController = filtered.last {
+                viewControllers = viewControllers.filter { subViewController in subViewController !== preservedViewController }
+                if pushStyle == .preserveAndHideBackButton {
+                    preservedViewController.navigationItem.hidesBackButton = true
+                }
+                viewControllers.append(preservedViewController)
+                return navigationController.setViewControllers(viewControllers, animated: animated)
+            }
+            if pushStyle == .preserveAndHideBackButton {
+                viewController.navigationItem.hidesBackButton = true
+            }
+        case .replace:
+            viewController.navigationItem.hidesBackButton = true
+            return navigationController.setViewControllers([viewController], animated: animated)
+        }
+
+        navigationController.pushViewController(viewController, animated: animated)
     }
 
     override open var transitioningDelegate: UIViewControllerTransitioningDelegate? {
@@ -310,9 +385,14 @@ extension UISideMenuNavigationController: MenuModel {
         set { settings.dismissWhenBackgrounded = newValue }
     }
 
-    @IBInspectable open var enableSwipeGestures: Bool {
-        get { return settings.enableSwipeGestures }
-        set { settings.enableSwipeGestures = newValue }
+    @IBInspectable open var enableSwipeToDismissGesture: Bool {
+        get { return settings.enableSwipeToDismissGesture }
+        set { settings.enableSwipeToDismissGesture = newValue }
+    }
+
+    @IBInspectable open var enableTapToDismissGesture: Bool {
+        get { return settings.enableTapToDismissGesture }
+        set { settings.enableTapToDismissGesture = newValue }
     }
 
     @IBInspectable open var initialSpringVelocity: CGFloat {
@@ -324,6 +404,11 @@ extension UISideMenuNavigationController: MenuModel {
     @IBInspectable open var leftSide: Bool {
         get { return _leftSide.value }
         set { _leftSide.value = newValue }
+    }
+  
+    /// Indicates if the menu is anywhere in the view hierarchy, even if covered by another view controller.
+    open override var isHidden: Bool {
+        return super.isHidden
     }
 
     @IBInspectable open var menuWidth: CGFloat {
@@ -401,21 +486,15 @@ extension UISideMenuNavigationController: UIViewControllerTransitioningDelegate 
 extension UISideMenuNavigationController: SideMenuTransitionControllerDelegate {
 
     internal func sideMenuTransitionController(_ transitionController: SideMenuTransitionController, didDismiss viewController: UIViewController) {
+        interactive = false
         sideMenuManager.sideMenuTransitionDidDismiss(menu: self)
     }
 
     internal func sideMenuTransitionController(_ transitionController: SideMenuTransitionController, didPresent viewController: UIViewController) {
-        guard !presentingViewControllerUserInteractionEnabled else { return }
-
-        let panGesture = UIPanGestureRecognizer()
-        panGesture.cancelsTouchesInView = false
-        panGesture.addTarget(self, action: #selector(handleDismissMenuPan(_:)))
-        view.superview?.addGestureRecognizer(panGesture)
-
-        let tapGestureRecognizer = UITapGestureRecognizer()
-        tapGestureRecognizer.addTarget(self, action: #selector(handleDismissMenuTap(_:)))
-        tapGestureRecognizer.cancelsTouchesInView = false
-        view.superview?.addGestureRecognizer(tapGestureRecognizer)
+        interactive = false
+        removeSwipeGesture()
+        swipeToDismissGesture = addSwipeToDismissGesture(to: view.superview)
+        tapToDismissGesture = addTapToDismissGesture(to: view.superview)
     }
 }
 
@@ -462,93 +541,6 @@ internal extension UISideMenuNavigationController {
 
 private extension UISideMenuNavigationController {
 
-    func shouldPushViewController(viewController: UIViewController, animated: Bool, completion: ((Bool) -> Void)?) -> Bool {
-        guard viewControllers.count > 0 && pushStyle != .subMenu else {
-            // NOTE: pushViewController is called by init(rootViewController: UIViewController)
-            // so we must perform the normal super method in this case
-            return true
-        }
-
-        let splitViewController = presentingViewController as? UISplitViewController
-        let tabBarController = presentingViewController as? UITabBarController
-        let potentialNavigationController = (splitViewController?.viewControllers.first ?? tabBarController?.selectedViewController) ?? presentingViewController
-        guard let navigationController = potentialNavigationController as? UINavigationController else {
-            Print.warning(.cannotPush, arguments: String(describing: potentialNavigationController.self), required: true)
-            return false
-        }
-
-        // To avoid overlapping dismiss & pop/push calls, create a transaction block where the menu
-        // is dismissed after showing the appropriate screen
-        CATransaction.begin()
-        defer { CATransaction.commit() }
-        var push = false
-
-        if dismissOnPush {
-            let animated = animated || alwaysAnimate
-            if animated {
-                let areAnimationsEnabled = UIView.areAnimationsEnabled
-                UIView.setAnimationsEnabled(true)
-                transitionController?.transition(presenting: false, animated: animated, alongsideTransition: { [weak self] in
-                    guard let self = self else { return }
-                    self.activeDelegate?.sideMenuWillDisappear?(menu: self, animated: animated)
-                    }, completion: { [weak self] _ in
-                        guard let self = self else { return }
-                        self.activeDelegate?.sideMenuDidDisappear?(menu: self, animated: animated)
-                        self.dismiss(animated: false, completion: nil)
-                        completion?(push)
-                })
-                UIView.setAnimationsEnabled(areAnimationsEnabled)
-            }
-        }
-
-        if let lastViewController = navigationController.viewControllers.last,
-            !allowPushOfSameClassTwice && type(of: lastViewController) == type(of: viewController) {
-            return false
-        }
-
-        switch pushStyle {
-        case .subMenu: return false // handled earlier
-        case .default:
-            navigationController.pushViewController(viewController, animated: animated)
-            return false
-        case .popWhenPossible:
-            for subViewController in navigationController.viewControllers.reversed() {
-                if type(of: subViewController) == type(of: viewController) {
-                    navigationController.popToViewController(subViewController, animated: animated)
-                    return false
-                }
-            }
-            push = true
-            return true
-        case .preserve, .preserveAndHideBackButton:
-            var viewControllers = navigationController.viewControllers
-            let filtered = viewControllers.filter { preservedViewController in type(of: preservedViewController) == type(of: viewController) }
-            if let preservedViewController = filtered.last {
-                viewControllers = viewControllers.filter { subViewController in subViewController !== preservedViewController }
-                if pushStyle == .preserveAndHideBackButton {
-                    preservedViewController.navigationItem.hidesBackButton = true
-                }
-                viewControllers.append(preservedViewController)
-                navigationController.setViewControllers(viewControllers, animated: animated)
-                return false
-            }
-            if pushStyle == .preserveAndHideBackButton {
-                viewController.navigationItem.hidesBackButton = true
-            }
-
-            push = true
-            return true
-        case .replace:
-            viewController.navigationItem.hidesBackButton = true
-            navigationController.setViewControllers([viewController], animated: animated)
-            return false
-        }
-    }
-
-    private class func elseCondition(_ propertyName: PropertyName) {
-        Print.warning(.property, arguments: propertyName.rawValue, required: true)
-    }
-
     weak var activeDelegate: UISideMenuNavigationControllerDelegate? {
         guard !view.isHidden else { return nil }
         if let sideMenuDelegate = sideMenuDelegate {
@@ -579,7 +571,6 @@ private extension UISideMenuNavigationController {
         modalPresentationStyle = .overFullScreen
 
         setupBlur()
-        setupSwipeGestures()
         registerForNotifications()
     }
 
@@ -626,12 +617,15 @@ private extension UISideMenuNavigationController {
         }
     }
 
-    func setupSwipeGestures() {
+    func removeSwipeGesture() {
         if let swipeToDismissGesture = swipeToDismissGesture {
             swipeToDismissGesture.view?.removeGestureRecognizer(swipeToDismissGesture)
         }
-        if enableSwipeGestures {
-            swipeToDismissGesture = addDismissPanGesture(to: view)
+    }
+
+    func removeTapGesture() {
+        if let tapToDismissGesture = tapToDismissGesture {
+            tapToDismissGesture.view?.removeGestureRecognizer(tapToDismissGesture)
         }
     }
 
@@ -661,16 +655,23 @@ private extension UISideMenuNavigationController {
         }
     }
 
-    @discardableResult func addDismissPanGesture(to view: UIView) -> UIPanGestureRecognizer {
-        return UIPanGestureRecognizer {
+    @discardableResult func addSwipeToDismissGesture(to view: UIView?) -> UIPanGestureRecognizer? {
+        guard enableSwipeToDismissGesture else { return nil }
+        return UIPanGestureRecognizer(addTo: view, target: self, action: #selector(handleDismissMenuPan(_:)))?.with {
             $0.cancelsTouchesInView = false
-            $0.addTarget(self, action: #selector(handleDismissMenuPan(_:)))
-            view.addGestureRecognizer($0)
+        }
+    }
+
+    @discardableResult func addTapToDismissGesture(to view: UIView?) -> UITapGestureRecognizer? {
+        guard enableTapToDismissGesture else { return nil }
+        return UITapGestureRecognizer(addTo: view, target: self, action: #selector(handleDismissMenuTap(_:)))?.with {
+            $0.cancelsTouchesInView = false
         }
     }
 
     @objc func handleDismissMenuTap(_ tap: UITapGestureRecognizer) {
-        guard view.window?.hitTest(tap.location(in: nil), with: nil) == view.superview else { return }
+        let hitTest = view.window?.hitTest(tap.location(in: view.superview), with: nil)
+        guard hitTest == view.superview else { return }
         dismissMenu()
     }
 

@@ -75,7 +75,7 @@ class EntryViewController: UIViewController, UITableViewDataSource, UITableViewD
     var array = [String]()
     var secti = Int()
     var barAccessory = UIToolbar()
-    let font = UserDefaults.standard.string(forKey: "secilenFont")
+    let font = UserDefaults.standard.string(forKey: "secilenFont") ?? "Helvetica"
     let tema = UserDefaults.standard.integer(forKey: "secilenTema")
     let safari = UserDefaults.standard.bool(forKey: "link")
     let entryGizle = UserDefaults.standard.bool(forKey: "gizle")
@@ -270,7 +270,6 @@ class EntryViewController: UIViewController, UITableViewDataSource, UITableViewD
     @IBOutlet weak var entryYazButton: UIBarButtonItem!
 
     var resultSearchController = UISearchController()
-    
     var indexP = IndexPath()
     @IBAction func digerButton(_ sender: UIButton) {
         
@@ -290,6 +289,35 @@ class EntryViewController: UIViewController, UITableViewDataSource, UITableViewD
             UIPasteboard.general.string = self.entryler[self.indexP.row].string
             self.view.makeToast("entry başarıyla kopyalandı")
         }))
+        alert.addAction(UIAlertAction(title: "entry'yi ekran görüntüsü olarak paylaş", style: .default, handler: { (UIAlertAction) in
+            if self.entryler[self.indexP.row].string.count>2000{
+                self.view.makeToast("entry çok uzun. ekran görüntüsü olarak paylaşılamıyor.", point: .init(x: UIScreen.main.bounds.width/2, y: UIScreen.main.bounds.height/2), title: "hata", image: nil, completion: nil)
+            }else{
+            let cell = self.entryView.cellForRow(at: self.indexP) as! entryViewTableCell
+            let frame = self.entryView.cellForRow(at: self.indexP)?.frame
+            let kalan = self.indexP.row % 2
+            cell.entryText.backgroundColor = (kalan == 0) ? Theme.cellFirstColor : Theme.cellSecondColor
+            cell.entryText.text = ""
+                UIGraphicsBeginImageContextWithOptions(frame!.size, true, UIScreen.main.scale)
+            cell.entryText.attributedText = self.entryler[self.indexP.row]
+            cell.entryText.textColor = Theme.labelColor
+            cell.entryText.tintColor = Theme.linkColor
+            cell.layer.render(in: UIGraphicsGetCurrentContext()!)
+            let snapshot = UIGraphicsGetImageFromCurrentImageContext()
+                UIGraphicsEndImageContext()
+
+           UIGraphicsBeginImageContextWithOptions((self.navigationController?.navigationBar.layer.bounds.size)!, true, UIScreen.main.scale)
+                self.navigationController?.navigationBar.drawHierarchy(in: (self.navigationController?.navigationBar.layer.bounds)!, afterScreenUpdates: false)
+                let ss = UIGraphicsGetImageFromCurrentImageContext()
+                UIGraphicsEndImageContext()
+                
+                let img = self.getMixedImg(image1: ss!, image2: snapshot!)
+                
+                let shareItem = [img]
+            let activityController = UIActivityViewController(activityItems: shareItem, applicationActivities: nil)
+            self.present(activityController, animated: true, completion: nil)
+            }
+        }))
         alert.addAction(UIAlertAction(title: "vazgeç", style: .cancel, handler: { (UIAlertAction) in
             self.dismiss(animated: true, completion: nil)
         }))
@@ -305,7 +333,27 @@ class EntryViewController: UIViewController, UITableViewDataSource, UITableViewD
         }
         self.present(alert,animated: true, completion: nil)
     }
+    func imageWithView(view: UIView) -> UIImage? {
+        UIGraphicsBeginImageContextWithOptions(view.bounds.size, view.isOpaque, 0.0)
+        defer { UIGraphicsEndImageContext() }
+        view.drawHierarchy(in: view.bounds, afterScreenUpdates: true)
+        return UIGraphicsGetImageFromCurrentImageContext()
+    }
     
+    func getMixedImg(image1: UIImage, image2: UIImage) -> UIImage? {
+        
+        let size = CGSize(width: image1.size.width, height: image1.size.height + image2.size.height)
+        
+        UIGraphicsBeginImageContextWithOptions(size, true, UIScreen.main.scale)
+        
+        image1.draw(in: CGRect(x: 0,y: 0,width: size.width, height: image1.size.height))
+        image2.draw(in: CGRect(x: 0,y: image1.size.height,width: size.width, height: image2.size.height))
+        let finalImage = UIGraphicsGetImageFromCurrentImageContext()!
+        UIGraphicsEndImageContext()
+        
+        return finalImage
+    }
+
     override func viewWillAppear(_ animated: Bool) {
         self.navigationController?.setNavigationBarHidden(false, animated: true)
     }
@@ -391,7 +439,7 @@ class EntryViewController: UIViewController, UITableViewDataSource, UITableViewD
         self.entryView.scrollIndicatorInsets = adjustForTabbarInsets
         resultSearchController = ({
             let controller = UISearchController(searchResultsController: nil)
-            controller.searchBar.barStyle = Theme.barStyle!
+            controller.searchBar.barStyle = Theme.barStyle ?? .default
             controller.searchBar.tintColor = .white
             controller.searchResultsUpdater = self
             controller.dimsBackgroundDuringPresentation = false
@@ -408,13 +456,12 @@ class EntryViewController: UIViewController, UITableViewDataSource, UITableViewD
             self.entryView.backgroundView = UIView()
             return controller
         })()
-        let point = CGPoint(x: 0, y:(self.navigationController?.navigationBar.frame.size.height)! + 12)
-        entryView.setContentOffset(point, animated: true)
+      //  let point = CGPoint(x: 0, y:(self.navigationController?.navigationBar.frame.size.height)! + 12)
+       // entryView.setContentOffset(point, animated: true)
         if status == false{
             takipButonu.isHidden = true
         }
     }
-    
     
     var refreshView: RefreshView!
     
@@ -437,6 +484,7 @@ class EntryViewController: UIViewController, UITableViewDataSource, UITableViewD
         siteyeBaglan()
         self.tableViewRefreshControl.endRefreshing()
     }
+    
     func prepareUI() {
         // Adding 'tableViewRefreshControl' to tableView
         entryView.refreshControl = tableViewRefreshControl
@@ -945,7 +993,11 @@ class EntryViewController: UIViewController, UITableViewDataSource, UITableViewD
             let controller = SFSafariViewController(url: URL)
             controller.preferredBarTintColor = Theme.backgroundColor
             controller.preferredControlTintColor = Theme.entryButton
-            controller.dismissButtonStyle = .close
+                if #available(iOS 11.0, *) {
+                    controller.dismissButtonStyle = .close
+                } else {
+                    // Fallback on earlier versions
+                }
             self.present(controller, animated: true, completion: nil)
             controller.delegate = self
             func safariViewControllerDidFinish(_ controller: SFSafariViewController) {
@@ -997,7 +1049,7 @@ class EntryViewController: UIViewController, UITableViewDataSource, UITableViewD
         blurEffectView.frame = view.bounds
         blurEffectView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         view.addSubview(blurEffectView)
-        view.frame = CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width, height: 30)
+        view.frame = CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width, height: 60)
         view.layer.masksToBounds = false
         view.layer.shadowColor = Theme.userColor?.cgColor
         view.layer.shadowOffset = CGSize(width: 0.0, height: 0.3)
@@ -1006,9 +1058,13 @@ class EntryViewController: UIViewController, UITableViewDataSource, UITableViewD
         let tumuButton = UIButton()
         tumuButton.setTitle(self.baslikKontrolu[0], for: .normal)
         tumuButton.setTitleColor(Theme.userColor, for: .normal)
-                tumuButton.titleLabel?.font = UIFont(name: font!, size: CGFloat(puntosecim))
-        tumuButton.frame = view.bounds
+                tumuButton.titleLabel?.font = UIFont(name: font, size: CGFloat(puntosecim))
+        tumuButton.frame = CGRect(x: view.bounds.minX, y: view.bounds.minY, width: view.bounds.width, height: view.bounds.height-25)
         tumuButton.addTarget(self, action: #selector(self.headerButton(sender:)), for: UIControl.Event.touchUpInside)
+                
+                let tapRec = UITapGestureRecognizer(target: self, action: #selector(self.headerButton(sender:)))
+                    
+        view.addGestureRecognizer(tapRec)
         view.addSubview(tumuButton)
             return view
         }
@@ -1050,7 +1106,7 @@ class EntryViewController: UIViewController, UITableViewDataSource, UITableViewD
             let tumuButton = UIButton()
             tumuButton.setTitle(self.baslikKontrolu[1], for: .normal)
             tumuButton.setTitleColor(Theme.userColor, for: .normal)
-            tumuButton.titleLabel?.font = UIFont(name: font!, size: CGFloat(puntosecim))
+            tumuButton.titleLabel?.font = UIFont(name: font, size: CGFloat(puntosecim))
             tumuButton.frame = view.bounds
             tumuButton.addTarget(self, action: #selector(footerButton(sender:)), for: UIControl.Event.touchUpInside)
             view.addSubview(tumuButton)
@@ -1090,6 +1146,8 @@ class EntryViewController: UIViewController, UITableViewDataSource, UITableViewD
             cell.tarihLabel.textColor = Theme.tarihColor
             cell.sukelaSayi.text = yorumArtiOy[indexPath.row]
             cell.kotuleSayi.text = yorumEksiOy[indexPath.row]
+            cell.kotule.setImage(UIImage(named: "kötüle"), for: .normal)
+            cell.sukela.setImage(UIImage(named: "şükela"), for: .normal)
             cell.sukelaSayi.textColor = Theme.tarihColor!
             cell.kotuleSayi.textColor = Theme.tarihColor!
             cell.backgroundColor = Theme.yorumColor!
@@ -1336,7 +1394,6 @@ class EntryViewController: UIViewController, UITableViewDataSource, UITableViewD
                 self.kullanici(html: html)
                 self.BaslikGetir(html: html)
                 self.yildizsayisi = 0
-                self.linkler.removeAll()
                 self.BasliklinkiGetir(html: html)
                 self.sayfaSayisiGetir(html: html)
                 self.girisKontrol(html: html)
@@ -1348,6 +1405,7 @@ class EntryViewController: UIViewController, UITableViewDataSource, UITableViewD
                 self.yildizlar.removeAll()
                 self.entryleriGetir(html: html)
                 self.suserGetir(html: html)
+                self.linkler.removeAll()
                 self.tarihGetir(html: html)
                 if self.status == true{
                     self.olayKontrol(html: html)
@@ -1476,8 +1534,10 @@ class EntryViewController: UIViewController, UITableViewDataSource, UITableViewD
             if kotule[indexPath.row] == false{
                 Alamofire.request("https://eksisozluk.com/entry/vote",method: .post, parameters: parameters, headers: headers).responseJSON { response in
                     if response.result.isSuccess{
+                        let cell = self.entryView.cellForRow(at: indexPath) as! entryViewTableCell
                             if let image = UIImage(named: "kötülendi") {
                                 sender.setImage(image, for: .normal)
+                                cell.sukela.setImage(UIImage(named: "şükela"), for: .normal)
                             }
                     }
                 }
@@ -1503,8 +1563,10 @@ class EntryViewController: UIViewController, UITableViewDataSource, UITableViewD
             if sukela[indexPath.row] == false{
                 Alamofire.request("https://eksisozluk.com/entry/vote",method: .post, parameters: parameters, headers: headers).responseJSON { response in
                     if response.result.isSuccess{
+                        let cell = self.entryView.cellForRow(at: indexPath) as! entryViewTableCell
                         if let image = UIImage(named: "şükelalandı") {
                             sender.setImage(image, for: .normal)
+                            cell.kotule.setImage(UIImage(named: "kötüle"), for: .normal)
                         }
                     }
                 }
@@ -1573,8 +1635,8 @@ class EntryViewController: UIViewController, UITableViewDataSource, UITableViewD
             for sayfa in doc.css("li[class^=messages mobile-only] a svg"){
                 let olayTuru = sayfa.className!
                 if olayTuru.contains("green"){
-                    tabBarController?.tabBar.items?.last!.badgeValue = "mesaj"
-                    tabBarController?.tabBar.items?.last!.badgeColor = Theme.entryButton
+                    tabBarController?.tabBar.items?[2].badgeValue = "mesaj"
+                    tabBarController?.tabBar.items?[2].badgeColor = Theme.entryButton
                 }else{
                     tabBarController?.tabBar.items?.last!.badgeValue = nil
                 }
@@ -1586,10 +1648,10 @@ class EntryViewController: UIViewController, UITableViewDataSource, UITableViewD
             for sayfa in doc.css("li[class^=tracked mobile-only] a svg"){
                 let olayTuru = sayfa.className!
                 if olayTuru.contains("green"){
-                    tabBarController?.tabBar.items?[3].badgeValue = "olay"
-                    tabBarController?.tabBar.items?[3].badgeColor = Theme.entryButton
+                    tabBarController?.tabBar.items?[2].badgeValue = "olay"
+                    tabBarController?.tabBar.items?[2].badgeColor = Theme.entryButton
                 }else{
-                    tabBarController?.tabBar.items?[3].badgeValue = nil
+                    tabBarController?.tabBar.items?[2].badgeValue = nil
                 }
             }
         }
@@ -1608,9 +1670,9 @@ class EntryViewController: UIViewController, UITableViewDataSource, UITableViewD
                 let yorum = entryIcerik.parent?.at_css("div[class^=comment-content]")
                 var entry = entryIcerik.toHTML
                 if self.tema == 0 || self.tema == 2{
-                    entry?.append(contentsOf: "<style>body{ font-size:\(puntosecim)px; font-family:\(font!), sans-serif} mark{background-color:#616161;}a{text-decoration:none}</style>")
+                    entry?.append(contentsOf: "<style>body{ font-size:\(puntosecim)px; font-family:\(font), sans-serif} mark{background-color:#616161;}a{text-decoration:none}</style>")
                 }else{
-                entry?.append(contentsOf: "<style>body{ font-size:\(puntosecim)px; font-family:\(font!), sans-serif} mark{background-color:#ffff9e;}a{text-decoration:none}</style>")
+                entry?.append(contentsOf: "<style>body{ font-size:\(puntosecim)px; font-family:\(font), sans-serif} mark{background-color:#ffff9e;}a{text-decoration:none}</style>")
                 }
                 let goruntule = entry?.html2AttributedString
                 self.yorum.append(true)
@@ -1653,7 +1715,7 @@ class EntryViewController: UIViewController, UITableViewDataSource, UITableViewD
                 if yorum?.toHTML != nil && yorum?.toHTML?.html2String != "\n"{
                     var yoruml = yorum?.toHTML
                     let user = yorum?.parent
-                    yoruml?.append(contentsOf: "<style>body{ font-size:\(puntosecim)px; font-family:\(font!), sans-serif} mark{background-color:#616161;}a{text-decoration:none}</style>")
+                    yoruml?.append(contentsOf: "<style>body{ font-size:\(puntosecim)px; font-family:\(font), sans-serif} mark{background-color:#616161;}a{text-decoration:none}</style>")
                     yorumlar = (yoruml?.html2AttributedString)!
 /*                    self.fav.append(false)
                     self.favoriSayisi.append(0)
@@ -1940,5 +2002,26 @@ class YorumViewCell: UITableViewCell{
     
     @IBOutlet weak var sukelaSayi: UILabel!
     
+    
+}
+
+extension UIImage {
+    
+    static func imageByMergingImages(topImage: UIImage, bottomImage: UIImage, scaleForTop: CGFloat = 1.0) -> UIImage {
+        let size = bottomImage.size
+        let container = CGRect(x: 0, y: 0, width: size.width, height: size.height)
+        UIGraphicsBeginImageContextWithOptions(size, false, 2.0)
+        UIGraphicsGetCurrentContext()!.interpolationQuality = .high
+        bottomImage.draw(in: container)
+        
+        let topWidth = size.width / scaleForTop
+        let topHeight = size.height / scaleForTop
+        let topX = (size.width / 2.0) - (topWidth / 2.0)
+        let topY = (size.height / 2.0) - (topHeight / 2.0)
+        
+        topImage.draw(in: CGRect(x: topX, y: topY, width: topWidth, height: topHeight), blendMode: .normal, alpha: 1.0)
+        
+        return UIGraphicsGetImageFromCurrentImageContext()!
+    }
     
 }

@@ -71,7 +71,7 @@ class TakipViewController: UIViewController, UITableViewDelegate, UITableViewDat
         cell.baslikLabel.adjustsFontSizeToFitWidth = true
         cell.baslikLabel.textColor = Theme.labelColor
         cell.baslikLabel.lineBreakMode = .byWordWrapping
-        cell.yazarLabel.text = yazarlar[indexPath.row]
+        cell.yazarLabel.text = yazarlar[indexPath.row] ?? "yazar"
         cell.yazarLabel.font = UIFont(name: font!, size: 13)
         cell.yazarLabel.lineBreakMode = .byWordWrapping
         cell.yazarLabel.textColor = Theme.userColor
@@ -90,7 +90,6 @@ class TakipViewController: UIViewController, UITableViewDelegate, UITableViewDat
     @IBAction func takipSecenek(_ sender: Any) {
         if secenekControl.selectedSegmentIndex == 0{
             CustomLoader.instance.showLoaderView()
-            navigationController?.navigationBar.topItem?.title = "takip - yazdıkları"
             self.takipLink = "https://eksisozluk.com/basliklar/takipentrymobile"
             self.yazarlar = [String]()
             self.basliklar = [String]()
@@ -101,7 +100,6 @@ class TakipViewController: UIViewController, UITableViewDelegate, UITableViewDat
         }
         if secenekControl.selectedSegmentIndex == 1{
             CustomLoader.instance.showLoaderView()
-            navigationController?.navigationBar.topItem?.title = "takip - favladıkları"
             self.takipLink = "https://eksisozluk.com/basliklar/takipfavmobile"
             self.yazarlar = [String]()
             self.basliklar = [String]()
@@ -165,10 +163,10 @@ class TakipViewController: UIViewController, UITableViewDelegate, UITableViewDat
             for sayfa in doc.css("li[class^=messages mobile-only] a svg"){
                 let olayTuru = sayfa.className!
                 if olayTuru.contains("green"){
-                    tabBarController?.tabBar.items?.last!.badgeValue = "mesaj"
-                    tabBarController?.tabBar.items?.last!.badgeColor = Theme.userColor
+                    tabBarController?.tabBar.items?[2].badgeValue = "mesaj"
+                    tabBarController?.tabBar.items?[2].badgeColor = Theme.userColor
                 }else{
-                    tabBarController?.tabBar.items?.last!.badgeValue = nil
+                    tabBarController?.tabBar.items?[2].badgeValue = nil
                 }
             }
         }
@@ -178,10 +176,10 @@ class TakipViewController: UIViewController, UITableViewDelegate, UITableViewDat
             for sayfa in doc.css("li[class^=tracked mobile-only] a svg"){
                 let olayTuru = sayfa.className!
                 if olayTuru.contains("green"){
-                    tabBarController?.tabBar.items?[3].badgeValue = "olay"
-                    tabBarController?.tabBar.items?[3].badgeColor = Theme.userColor
+                    tabBarController?.tabBar.items?[2].badgeValue = "olay"
+                    tabBarController?.tabBar.items?[2].badgeColor = Theme.userColor
                 }else{
-                    tabBarController?.tabBar.items?[3].badgeValue = nil
+                    tabBarController?.tabBar.items?[2].badgeValue = nil
                 }
             }
         }

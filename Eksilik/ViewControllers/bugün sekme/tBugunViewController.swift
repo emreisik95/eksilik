@@ -37,7 +37,7 @@ class tBugunViewController: UIViewController, UITableViewDelegate, UITableViewDa
         self.view.addSubview(typePickerView)
         barAccessory = UIToolbar(frame: CGRect(x: 0, y: UIScreen.main.bounds.height - 404, width: typePickerView.frame.size.width, height: 44))
         barAccessory.barStyle = Theme.barStyle!
-        barAccessory.barTintColor = Theme.navigationBarColor
+        barAccessory.barTintColor = Theme.userColor
         let flexiblespace = UIBarButtonItem(barButtonSystemItem:.flexibleSpace , target: nil, action: nil)
         let btnDone = UIBarButtonItem(title: "tamam", style: .done, target: self, action: #selector(tamam(_:)))
         btnDone.tintColor = Theme.labelColor
@@ -71,13 +71,14 @@ class tBugunViewController: UIViewController, UITableViewDelegate, UITableViewDa
         tbugunView.separatorStyle = .singleLine
         tbugunView.separatorColor = Theme.separatorColor
         tbugunView.backgroundColor = Theme.backgroundColor
-        self.view.backgroundColor = Theme.backgroundColor
         simdikiTarih.backgroundColor = Theme.userColor
+        self.view.backgroundColor = Theme.backgroundColor
         tbugunView.delegate = self
         tbugunView.dataSource = self
         siteyeBaglan()
         self.typePickerView.dataSource = self
         self.typePickerView.delegate = self
+        self.typePickerView.backgroundColor = Theme.backgroundColor
         self.typePickerView.frame = CGRect(x: 0, y: UIScreen.main.bounds.height - 360, width: UIScreen.main.bounds.width, height: 250)
         tabBarController?.tabBar.installBlurEffect()
         self.navigationController?.navigationBar.installBlurEffect()
@@ -317,10 +318,10 @@ class tBugunViewController: UIViewController, UITableViewDelegate, UITableViewDa
             for sayfa in doc.css("li[class^=messages mobile-only] a svg"){
                 let olayTuru = sayfa.className!
                 if olayTuru.contains("green"){
-                    tabBarController?.tabBar.items?.last!.badgeValue = "mesaj"
-                    tabBarController?.tabBar.items?.last!.badgeColor = Theme.userColor
+                    tabBarController?.tabBar.items?[2].badgeValue = "mesaj"
+                    tabBarController?.tabBar.items?[2].badgeColor = Theme.userColor
                 }else{
-                    tabBarController?.tabBar.items?.last!.badgeValue = nil
+                    tabBarController?.tabBar.items?[2].badgeValue = nil
                 }
             }
         }
@@ -330,10 +331,10 @@ class tBugunViewController: UIViewController, UITableViewDelegate, UITableViewDa
             for sayfa in doc.css("li[class^=tracked mobile-only] a svg"){
                 let olayTuru = sayfa.className!
                 if olayTuru.contains("green"){
-                    tabBarController?.tabBar.items?[3].badgeValue = "olay"
-                    tabBarController?.tabBar.items?[3].badgeColor = Theme.userColor
+                    tabBarController?.tabBar.items?[2].badgeValue = "olay"
+                    tabBarController?.tabBar.items?[2].badgeColor = Theme.userColor
                 }else{
-                    tabBarController?.tabBar.items?[3].badgeValue = nil
+                    tabBarController?.tabBar.items?[2].badgeValue = nil
                 }
             }
         }

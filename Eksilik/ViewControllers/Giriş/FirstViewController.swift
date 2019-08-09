@@ -14,15 +14,16 @@ import WhatsNew
 import SwiftRater
 import Toast_Swift
 import Crashlytics
+import Parchment
 
-class FirstViewController: UIViewController ,UITableViewDelegate, UITableViewDataSource, UISearchResultsUpdating, UISearchBarDelegate, UITabBarControllerDelegate, UIViewControllerPreviewingDelegate{
-    
+class FirstViewController: UIViewController ,UITableViewDelegate, UITableViewDataSource, UISearchResultsUpdating, UISearchBarDelegate, UITabBarControllerDelegate, UIViewControllerPreviewingDelegate, UISplitViewControllerDelegate{
     
     
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         tabBarController?.tabBar.invalidateIntrinsicContentSize()
     }
+    var ustbosluk = 0//UINavigationController().navigationBar.frame.height + 20
     var puntosecim = 15
     var filteredBaslikTableData = [String]()
     var filteredSuserTableData = [String]()
@@ -50,7 +51,7 @@ class FirstViewController: UIViewController ,UITableViewDelegate, UITableViewDat
             self.filteredBaslikTableData = self.basliklar
             self.suserlar = suser as! [String]
             self.filteredSuserTableData = self.suserlar
-            self.baslikView.reloadData()
+            self.baslikView?.reloadData()
         }
         if self.filteredSuserTableData.count == 0 && self.filteredBaslikTableData.count == 0 && resultSearchController.searchBar.text!.count<1{
             self.baslikView.addSubview(self.viewcim)
@@ -67,20 +68,15 @@ class FirstViewController: UIViewController ,UITableViewDelegate, UITableViewDat
     }
     override func viewWillAppear(_ animated: Bool) {
         SwiftRater.check(host: self)
-
        puntosecim = UserDefaults.standard.integer(forKey: "secilenPunto")
     }
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         if WhatsNew.shouldPresent() {
             let whatsNew = WhatsNewViewController(items: [
-                WhatsNewItem.text(title: "twitter linkleri için düzenleme", subtitle: "artık twitter linkleri telefonunuzda twitter uygulaması yüklüyse direkt uygulamadan açılacak. (linkler  uygulama içinde açılsın seçeneği aktif olduğunda geçerlidir)"),
-                WhatsNewItem.text(title: "öne çıkan entry", subtitle: "profilinizdeki veya herhangi bir suser'ın profilindeki öne çıkan entry'e basınca direkt olarak başlığa yönleneceksiniz"),
-                WhatsNewItem.text(title: "çaylak onay listesi", subtitle: "çaylakların profil sayfasına girdiklerinde sıralamada kaçıncı olduklarını görmelerine engel olan hata giderildi"),
-                WhatsNewItem.text(title: "profil seçenekleri", subtitle: "bir suser'ın profiline girdiğinizde sağ üstteki üç noktadan takip et, engelle, başlıklarını engelle gibi işlemleri yapabileceğiniz menü eklendi"),
-                WhatsNewItem.text(title: "klasik tema icon değişikliği", subtitle: "klasik temaya ruhuna uygun logo eklendi"),
-                WhatsNewItem.text(title: "birçok hata giderildi", subtitle: "uygulamanın kapanmasına neden olan birçok hata giderildi"),
-               WhatsNewItem.text(title: "çeşitli arayüz güncellemeleri", subtitle: "yeni geçişler, mesaj cevap verme arayüzündeki güncellemeler gibi ayarlar güncellendi."),
+                WhatsNewItem.text(title: "uygulama düzeninde değişiklik", subtitle: "artık gündem-bugün-tarihte bugün-sorunsallar-takip gibi başlıklara tek bir sayfadan ulaşabilirsiniz. ayarlar için ilk sayfada sol üstte bulunan butonu kullanabilirsiniz, mesajlara zil ikonuna basarak ulaşabilirsiniz."),
+                WhatsNewItem.text(title: "entry ekran resmini paylaşma", subtitle: "entry'nin altındaki üç noktaya bastığınız zaman entry'nin görsel halini direkt olarak paylaşma imkanına sahipsiniz"),
+                WhatsNewItem.text(title: "hata düzeltmeleri", subtitle: "elimden geldiğince her sürümde hata düzeltmelerini yapıyorum, lütfen gördüğünüz hatalar için benimle iletişime geçmekten çekinmeyin"),
                 WhatsNewItem.text(title: "teşekkürler", subtitle: "uygulamayı her gün geliştirmeye çalışıyorum. eğer herhangi bir hatayla karşılaşırsanız ve istediğiniz ekstra bir özellik olursa lütfen sherlockun besinci sezonu'na mesaj gönderin.")
                 ])
             whatsNew.titleText = "neler yeni?"
@@ -112,7 +108,7 @@ class FirstViewController: UIViewController ,UITableViewDelegate, UITableViewDat
             vc.baslikLinki = "https://eksisozluk.com/entry/\(entryNo)"
             self.navigationController?.pushViewController(vc, animated: true)
             resultSearchController.isActive = false
-            baslikView.reloadData()
+            baslikView?.reloadData()
         }
         if yazi.contains("@"){
             let vc =
@@ -122,7 +118,7 @@ class FirstViewController: UIViewController ,UITableViewDelegate, UITableViewDat
             vc.asilLink = "https://eksisozluk.com/biri/\(suser)"
             self.navigationController?.pushViewController(vc, animated: true)
             resultSearchController.isActive = false
-            baslikView.reloadData()
+            baslikView?.reloadData()
         }
         let vc =
             self.storyboard?.instantiateViewController(withIdentifier:
@@ -131,7 +127,7 @@ class FirstViewController: UIViewController ,UITableViewDelegate, UITableViewDat
         vc.baslikLinki = "https://eksisozluk.com/\(baslik)"
         self.navigationController?.pushViewController(vc, animated: true)
         resultSearchController.isActive = false
-        baslikView.reloadData()
+        baslikView?.reloadData()
     }
 
     var basliklar = [String]()
@@ -164,10 +160,8 @@ class FirstViewController: UIViewController ,UITableViewDelegate, UITableViewDat
 
     override func viewDidLoad() {
         super.viewDidLoad()
+
        let tabBar = tabBarController?.tabBar
-       if  status == false && tabBar!.items!.count > 3{
-           cikis()
-       }
         tabBar?.installBlurEffect()
             self.siteyeBaglan()
         self.view.backgroundColor = Theme.backgroundColor
@@ -191,7 +185,7 @@ class FirstViewController: UIViewController ,UITableViewDelegate, UITableViewDat
             self.baslikView.tableHeaderView = controller.searchBar
             self.baslikView.backgroundView = UIView()
             let tbHeight = self.tabBarController?.tabBar.frame.height ?? 0
-            let adjustForTabbarInsets: UIEdgeInsets = UIEdgeInsets(top:0 , left: 0, bottom: tbHeight + 95, right: 0)
+            let adjustForTabbarInsets: UIEdgeInsets = UIEdgeInsets(top:0, left: 0, bottom: tbHeight + 95, right: 0)
             self.baslikView.contentInset = adjustForTabbarInsets
             self.baslikView.scrollIndicatorInsets = adjustForTabbarInsets
             return controller
@@ -267,11 +261,11 @@ class FirstViewController: UIViewController ,UITableViewDelegate, UITableViewDat
     func tabBarController(_ tabBarController: UITabBarController, didSelect viewController: UIViewController) {
         let tabBarIndex = tabBarController.selectedIndex
         if tabBarIndex == 0 {
-            CustomLoader.instance.showLoaderView()
+          /*  CustomLoader.instance.showLoaderView()
             siteyeBaglan()
             self.baslikView.beginUpdates()
             self.baslikView.setContentOffset(CGPoint(x: 0, y: -baslikView.contentInset.top), animated: true)
-            self.baslikView.endUpdates()
+            self.baslikView.endUpdates()*/
         }
     }
         
@@ -282,7 +276,7 @@ class FirstViewController: UIViewController ,UITableViewDelegate, UITableViewDat
                 UserDefaults.standard.set(false, forKey: "giris")
                 let vc = self.storyboard?.instantiateViewController(withIdentifier: "basla") as! UITabBarController
                 vc.viewControllers?.removeLast()
-                vc.viewControllers?.remove(at: 3)
+                vc.viewControllers?.remove(at: 2)
                 TarihPageViewController().viewDidLoad()
                 UIApplication.shared.keyWindow?.rootViewController = vc
             }
@@ -291,7 +285,7 @@ class FirstViewController: UIViewController ,UITableViewDelegate, UITableViewDat
     
     private func loadData() {
         DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(20)) {
-            self.baslikView.reloadData()
+            self.baslikView?.reloadData()
         }
     }
     @objc func refreshTableView() {
@@ -321,12 +315,13 @@ class FirstViewController: UIViewController ,UITableViewDelegate, UITableViewDat
                 let vc =
                     self.storyboard?.instantiateViewController(withIdentifier:
                         "entryGoruntule") as! EntryViewController
-                var link = filteredBaslikTableData[indexPath.row]
+                var link = filteredBaslikTableData[indexPath.row] 
                 link = link.addingPercentEncoding(withAllowedCharacters: CharacterSet(charactersIn: "!*'();:@&=+$,/?%#[]{} ").inverted)!
                 vc.baslikLinki = link
                 vc.extendedLayoutIncludesOpaqueBars = false
                 self.navigationController?.pushViewController(vc, animated: true)
                 resultSearchController.isActive = false
+                
             }
             if indexPath.section == 1{
                 let vc =
@@ -338,11 +333,11 @@ class FirstViewController: UIViewController ,UITableViewDelegate, UITableViewDat
                 self.navigationController?.pushViewController(vc, animated: true)
                 resultSearchController.isActive = false
             }
-            baslikView.reloadData()
+            baslikView?.reloadData()
         }else{
         seciliLink = linkler[indexPath.row]
         baslik = basliklar[indexPath.row]
-        baslikView.reloadData()
+        baslikView?.reloadData()
         }
         performSegue(withIdentifier: "entryVC", sender: nil)
         tableView.deselectRow(at: indexPath, animated: true)
@@ -427,7 +422,6 @@ class FirstViewController: UIViewController ,UITableViewDelegate, UITableViewDat
             })
             
             tableView.endUpdates()
-            print("küçültüldü")
             success(true)
         })
         closeAction.backgroundColor = Theme.userColor
@@ -508,7 +502,7 @@ class FirstViewController: UIViewController ,UITableViewDelegate, UITableViewDat
                // self.baslikentrysayisiGetir(html: html)
                 self.baslikGetir(html: html)
                // self.baslikLink(html: html)
-                self.baslikView.reloadData()
+                self.baslikView?.reloadData()
             }
             if response.result.isSuccess == false{
                 DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(1)) {
@@ -530,6 +524,7 @@ class FirstViewController: UIViewController ,UITableViewDelegate, UITableViewDat
                 if self.status == true{
                     self.olayKontrol(html: html)
                     self.mesajKontrol(html: html)
+                    self.kullaniciAdiGetir(html: html)
                 }
                 self.girisKontrol(html: html)
                 self.basliklar = [String]()
@@ -564,8 +559,23 @@ class FirstViewController: UIViewController ,UITableViewDelegate, UITableViewDat
                         self.present(alert, animated: true)                    }
                 }
         }
-            self.baslikView.reloadData()
-
+            self.baslikView?.reloadData()
+        self.baslikView?.setContentOffset(.zero, animated: true)
+    }
+    
+    func kullaniciAdiGetir(html: String) -> Void {
+        var k = [String]()
+        if let doc = try? Kanna.HTML(html: html, encoding: String.Encoding.utf8){
+            for basliklar in doc.css("li[class^=not-mobile] a"){
+                k.append(basliklar["title"] ?? "emre")
+            }
+        }
+        if k.count == 0{
+            cikis()
+        }else{
+        UserDefaults.standard.set(k[0], forKey: "kullaniciAdi")
+        print(k[0])
+        }
     }
     
     
@@ -579,7 +589,7 @@ class FirstViewController: UIViewController ,UITableViewDelegate, UITableViewDat
                     self.entrySayisi.append((entryNo?.content)!)
 
                 }
-                self.baslikView.reloadData()
+                self.baslikView?.reloadData()
             }
     }
 }
@@ -598,7 +608,7 @@ class FirstViewController: UIViewController ,UITableViewDelegate, UITableViewDat
                     self.linkler.append(basliklar["href"]!)
                 }
             }
-                self.baslikView.reloadData()
+                self.baslikView?.reloadData()
         }
     }
 
@@ -640,10 +650,10 @@ class FirstViewController: UIViewController ,UITableViewDelegate, UITableViewDat
                 let olayTuru = sayfa.className!
                 if olayTuru == "new-update"{
                     DispatchQueue.main.async(execute: {
-                        self.tabBarController?.tabBar.items?[3].badgeValue = "olay"
-                        self.tabBarController?.tabBar.items?.last!.badgeColor = Theme.userColor                    })
+                        self.tabBarController?.tabBar.items?[2].badgeValue = "olay"
+                        self.tabBarController?.tabBar.items?[2].badgeColor = Theme.userColor                    })
                 }else{
-                    self.tabBarController?.tabBar.items?[3].badgeValue = nil
+                    self.tabBarController?.tabBar.items?[2].badgeValue = nil
                 }
             }
         }
@@ -653,10 +663,10 @@ class FirstViewController: UIViewController ,UITableViewDelegate, UITableViewDat
             for sayfa in doc.css("li[class^=messages mobile-only] a svg"){
                 let olayTuru = sayfa.className!
                     if olayTuru.contains("green"){
-                        tabBarController?.tabBar.items?.last!.badgeValue = "mesaj"
-                        tabBarController?.tabBar.items?[3].badgeColor = Theme.userColor
+                        tabBarController?.tabBar.items?[2].badgeValue = "mesaj"
+                        tabBarController?.tabBar.items?[2].badgeColor = Theme.userColor
                     }else{
-                        tabBarController?.tabBar.items?.last!.badgeValue = nil
+                        tabBarController?.tabBar.items?[2].badgeValue = nil
                 }
             }
         }
@@ -691,7 +701,7 @@ extension UINavigationBar {
         var blurFrame = bounds
         blurFrame.size.height += statusBarHeight
         blurFrame.origin.y -= statusBarHeight
-        let blurView  = UIVisualEffectView(effect: Theme.blurEffect!)
+        let blurView  = UIVisualEffectView(effect: Theme.blurEffect)
         blurView.isUserInteractionEnabled = false
         blurView.frame = blurFrame
         blurView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
@@ -705,7 +715,7 @@ extension UITabBar {
         isTranslucent = true
         backgroundImage = UIImage()
         let blurFrame = bounds
-        let blurView  = UIVisualEffectView(effect: Theme.blurEffect!)
+        let blurView  = UIVisualEffectView(effect: Theme.blurEffect)
         blurView.isUserInteractionEnabled = false
         blurView.frame = blurFrame
         blurView.autoresizingMask = [.flexibleWidth, .flexibleHeight]

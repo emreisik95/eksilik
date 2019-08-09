@@ -13,7 +13,7 @@ import UserNotifications
 import SwiftRater
 
 @UIApplicationMain
-class AppDelegate: UIResponder, UIApplicationDelegate, CAAnimationDelegate {
+class AppDelegate: UIResponder, UIApplicationDelegate, CAAnimationDelegate, UISplitViewControllerDelegate {
 
     var window: UIWindow?
     
@@ -21,7 +21,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CAAnimationDelegate {
         // Override point for customization after application launch.
         //Açılış animasyonu
         // Override point for customization after application launch.
-        
+        self.window = UIWindow(frame: UIScreen.main.bounds)
+        self.window!.backgroundColor = Theme.backgroundColor
+
         self.window = UIWindow(frame: UIScreen.main.bounds)
         self.window!.backgroundColor = UIColor(red: 104/255, green: 156/255, blue: 56/255, alpha: 1)
         self.window!.makeKeyAndVisible()
@@ -29,7 +31,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CAAnimationDelegate {
         // rootViewController from StoryBoard
         let mainStoryboard: UIStoryboard = UIStoryboard(name: "Main", bundle: nil)
         let navigationController = mainStoryboard.instantiateViewController(withIdentifier: "basla") as! UITabBarController
-        self.window!.rootViewController = navigationController
+       self.window!.rootViewController = navigationController
         
         // logo mask
         navigationController.view.layer.mask = CALayer()
@@ -113,7 +115,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CAAnimationDelegate {
             "secilenFont": "Helvetica-Light",
             "secilenPunto": 15,
             "link": true,
-            "gizle": true
+            "gizle": true,
+            "kullaniciAdi": String()
             ])
 
         let value = UserDefaults.standard.integer(forKey: "secilenTema")
@@ -129,7 +132,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CAAnimationDelegate {
             UINavigationBar.appearance().isTranslucent = true
         }
         if tema == 3{
-            Theme.pembeTheme()
+            Theme.twitterTheme()
         }
         
         UINavigationBar.appearance().backgroundColor = Theme.navigationBarColor
@@ -148,16 +151,36 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CAAnimationDelegate {
             let isLoggedIn = status
             
             if  isLoggedIn == false {
-                viewControllers.remove(at: 3)
+                viewControllers.remove(at: 2)
                 viewControllers.removeLast()
                 tabController.viewControllers = viewControllers
                 self.window?.rootViewController = tabController
             }            
         }
         
+        // Instantiate root view controllers
+        let hueColorTableViewController = mainStoryboard.instantiateViewController(withIdentifier: "basla") as! UITabBarController
+        let colorDetailViewController = UIStoryboard.init(name: "Main", bundle: nil).instantiateViewController(withIdentifier:
+            "entryGoruntule") as! EntryViewController
         
+        // Embed in navigation controllers
+        let masterNavigationViewController = UINavigationController(rootViewController: hueColorTableViewController)
+        let detailNavigationController = UINavigationController(rootViewController: colorDetailViewController)
+        
+        
+        // Embed in Split View controller
+        let splitViewController = UISplitViewController()
+        splitViewController.viewControllers = [masterNavigationViewController,detailNavigationController]
+        
+        if let svc = self.window?.rootViewController as? UISplitViewController {
+            svc.preferredDisplayMode = .allVisible
+            if let nc = svc.viewControllers.last as? UINavigationController {
+                nc.topViewController?.navigationItem.leftBarButtonItem = svc.displayModeButtonItem
+            }
+        }
         return true
     }
+    
 
     func applicationWillResignActive(_ application: UIApplication) {
         // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.

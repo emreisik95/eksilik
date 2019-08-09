@@ -17,7 +17,9 @@ class mesajlListeViewController: UIViewController, UITableViewDelegate, UITableV
     var kullaniciAdi = [String]()
     var linkler = [String]()
     var baslikLinki = "https://eksisozluk.com/mesaj"
-    
+    var puntosecim = UserDefaults.standard.integer(forKey: "secilenPunto")
+    let font = UserDefaults.standard.string(forKey: "secilenFont")
+
     
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -76,7 +78,9 @@ class mesajlListeViewController: UIViewController, UITableViewDelegate, UITableV
         }
         cell.baslikLabel.textColor = Theme.userColor!
         cell.baslikLabel.adjustsFontSizeToFitWidth = true
+        cell.baslikLabel.font = UIFont(name: font!, size: CGFloat(puntosecim))
         cell.mesajLabel.textColor = Theme.labelColor!
+        cell.mesajLabel.font = UIFont(name: font!, size: CGFloat(puntosecim))
         cell.tarihLabel.textColor = .gray
         cell.mesajLabel.text = mesajlar[indexPath.row]
         cell.tarihLabel.text = tarihler[indexPath.row]
@@ -242,6 +246,7 @@ class mesajlListeViewController: UIViewController, UITableViewDelegate, UITableV
                 self.mesajLink(html: html)
                 self.kullaniciGetir(html: html)
                 self.tarihGetir(html: html)
+                self.mesajSayisi = [String]()
                 self.mesajSayisiGetir(html: html)
                 self.mesajView.isScrollEnabled = true
                 if self.mesajlar.count == 0 {

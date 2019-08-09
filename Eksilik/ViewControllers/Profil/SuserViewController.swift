@@ -13,7 +13,9 @@ import SafariServices
 
 class SuserViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, UIPickerViewDelegate, UIPickerViewDataSource, SFSafariViewControllerDelegate, UITextViewDelegate, UIViewControllerPreviewingDelegate {
     
+    var durum = [Bool]()
     var kullaniciAdi = [String]()
+    var benSuserName = [String]()
     var biriLink = String()
     var sonIstatistik = String()
     var tarih = String()
@@ -24,6 +26,8 @@ class SuserViewController: UIViewController, UITableViewDelegate, UITableViewDat
     let headers: HTTPHeaders = [ "X-Requested-With": "XMLHttpRequest"]
     var seciliLink = String()
     var linkler = [String]()
+    let benKadi = UserDefaults.standard.string(forKey: "kullaniciAdi")
+    var suserKadi = String()
     var array = ["son entryleri", "en beğenilenleri", "favori entryleri", "en çok favorilenenleri", "son oylananları", "bu hafta dikkat çekenleri"]
     var secti = Int()
     var barAccessory = UIToolbar()
@@ -91,7 +95,12 @@ class SuserViewController: UIViewController, UITableViewDelegate, UITableViewDat
     
     @IBAction func suserMore(_ sender: Any) {
         let alert = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
-        if durum.count <= 1 {
+        if durum.count < 1{
+            alert.addAction(UIAlertAction(title: "işlem bulunamadı", style: .default, handler: { (UIAlertAction) in
+                self.dismiss(animated: true, completion: nil)
+            }))
+        }
+        if durum.count <= 1 && durum.count != 0{
             alert.addAction(UIAlertAction(title: (durum[0] ? cikarBaslik[0] : ekleBaslik[0]), style: .default, handler: { (UIAlertAction) in
             Alamofire.request("https://eksisozluk.com/\(self.durum[0] ? self.cikarLink[0]: self.kisiLinkler[0])",method: .post, headers: self.headers).responseString {
                 response in
@@ -136,6 +145,7 @@ class SuserViewController: UIViewController, UITableViewDelegate, UITableViewDat
             }))
             }
         }
+
         alert.addAction(UIAlertAction(title: "vazgeç", style: .cancel, handler: { (UIAlertAction) in
             self.dismiss(animated: true, completion: nil)
         }))
@@ -241,16 +251,19 @@ class SuserViewController: UIViewController, UITableViewDelegate, UITableViewDat
         if traitCollection.forceTouchCapability == .available {
             registerForPreviewing(with: self, sourceView: entryList)
         }
-        
-        if status == false{
-            self.navigationController?.navigationItem.rightBarButtonItem = nil
-        }
+        self.navigationController?.navigationItem.rightBarButtonItem?.tintColor = Theme.userColor
+
         self.oneCikanBaslik.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(linkeGit)))
         self.oneCikanEntry.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(linkeGit)))
         
         tabBarController?.tabBar.installBlurEffect()
         self.bilgiCek()
         self.baslikCek()
+            if self.status == false{
+                self.navigationController?.navigationItem.rightBarButtonItem = nil
+            }
+
+    
         self.navigationController?.navigationBar.barStyle = Theme.barStyle!
         self.navigationController?.navigationBar.barTintColor = Theme.navigationBarColor
         self.view.backgroundColor = Theme.backgroundColor
@@ -269,9 +282,6 @@ class SuserViewController: UIViewController, UITableViewDelegate, UITableViewDat
         self.barAccessory.backgroundColor = Theme.userColor
         self.barAccessory.isHidden = true
         secti = 0
-        DispatchQueue.main.async {
-            print(self.kullaniciAdi)
-        }
     }
     
     @objc func linkeGit(){
@@ -288,8 +298,16 @@ class SuserViewController: UIViewController, UITableViewDelegate, UITableViewDat
                 "entryGoruntule") as! EntryViewController
         let cleanedText = self.kullaniciAdi.filter { !" \n\t\r".characters.contains($0) }
         vc.baslikLinki = cleanedText[0].addingPercentEncoding(withAllowedCharacters: .urlPathAllowed)!
-        print(cleanedText)
         self.navigationController?.pushViewController(vc, animated: true)
+    }
+    func benKullanici(html: String) -> Void {
+        if let doc = try? Kanna.HTML(html: html, encoding: String.Encoding.utf8){
+            for kullanici in doc.css("li[class^=mobile-only] a"){
+                var pullanici = kullanici.at_css("li[class^=not-mobile] a")
+                let k = pullanici?["title"]
+                self.benSuserName.append(k ?? "ben")
+            }
+        }
     }
 
     func previewingContext(_ previewingContext: UIViewControllerPreviewing, viewControllerForLocation location: CGPoint) -> UIViewController? {
@@ -366,13 +384,14 @@ class SuserViewController: UIViewController, UITableViewDelegate, UITableViewDat
         Alamofire.request("https://eksisozluk.com/\(biriLink)").responseString {
             response in
             if let html = response.result.value{
+                self.benKullanici(html: html)
                 self.kullaniciAdi(html: html)
                 self.kullaniciBilgi(html: html)
                 self.oneCikan(html: html)
                 self.entryleriGetir(html: html)
                 self.olayKontrol(html: html)
                 self.mesajKontrol(html: html)
-                if (self.status){
+                if self.status == true{
                 self.suserKontrol(html: html)
                 }
                 CustomLoader.instance.hideLoaderView()
@@ -406,21 +425,21 @@ class SuserViewController: UIViewController, UITableViewDelegate, UITableViewDat
             for sayfa in doc.css("li[class^=messages mobile-only] a svg"){
                 let olayTuru = sayfa.className!
                 if olayTuru.contains("green"){
-                    tabBarController?.tabBar.items?.last!.badgeValue = "mesaj"
-                    tabBarController?.tabBar.items?.last!.badgeColor = Theme.userColor
+                    tabBarController?.tabBar.items?[2].badgeValue = "mesaj"
+                    tabBarController?.tabBar.items?[2].badgeColor = Theme.userColor
                 }else{
-                    tabBarController?.tabBar.items?.last!.badgeValue = nil
+                    tabBarController?.tabBar.items?[2].badgeValue = nil
                 }
             }
         }
     }
     var engelli = String()
     var baslikEngelli = String()
-    var durum = [Bool]()
     var kisiLinkler = [String]()
     var cikarLink = [String]()
     var ekleBaslik = [String]()
     var cikarBaslik = [String]()
+    
     func suserKontrol(html: String) -> Void {
         if let doc = try? Kanna.HTML(html: html, encoding: String.Encoding.utf8){
              durum = [Bool]()
@@ -440,17 +459,16 @@ class SuserViewController: UIViewController, UITableViewDelegate, UITableViewDat
             kisiLinkler.removeLast()
             cikarLink.removeLast()
         }
-        print(durum)
     }
     func olayKontrol(html: String) -> Void {
         if let doc = try? Kanna.HTML(html: html, encoding: String.Encoding.utf8){
             for sayfa in doc.css("li[class^=tracked mobile-only] a svg"){
                 let olayTuru = sayfa.className!
                 if olayTuru.contains("green"){
-                    tabBarController?.tabBar.items?[3].badgeValue = "olay"
-                    tabBarController?.tabBar.items?[3].badgeColor = Theme.userColor
+                    tabBarController?.tabBar.items?[2].badgeValue = "olay"
+                    tabBarController?.tabBar.items?[2].badgeColor = Theme.userColor
                 }else{
-                    tabBarController?.tabBar.items?[3].badgeValue = nil
+                    tabBarController?.tabBar.items?[2].badgeValue = nil
                 }
             }
         }
@@ -474,8 +492,9 @@ class SuserViewController: UIViewController, UITableViewDelegate, UITableViewDat
         if let doc = try? Kanna.HTML(html: html, encoding: String.Encoding.utf8){
             for kullaniciBilgi in doc.css("h1[data-nick] a"){
                 let tlabel = UILabel(frame: CGRect(x: 0, y: -20, width: 200, height: 60))
-                print(kullaniciBilgi.text!)
                 self.kullaniciAdi.append(kullaniciBilgi.text!)
+                self.suserKadi = kullaniciBilgi.text!
+                print(kullaniciBilgi.text)
                 tlabel.text = kullaniciBilgi.text!
                 tlabel.textColor = Theme.titleColor
                 tlabel.textAlignment = .center;
@@ -483,6 +502,9 @@ class SuserViewController: UIViewController, UITableViewDelegate, UITableViewDat
                 tlabel.numberOfLines = 2
                 tlabel.adjustsFontSizeToFitWidth = true
                 self.navigationItem.titleView = tlabel
+                if self.benKadi! == kullaniciBilgi.text{
+                self.navigationController?.navigationItem.rightBarButtonItems = nil
+                }
             }
         }
     }
@@ -533,7 +555,6 @@ class SuserViewController: UIViewController, UITableViewDelegate, UITableViewDat
             self.oneCikanBaslik.alpha = 1
             
         }, completion: { finished in
-            print("Animation completed")
         })
         if let doc = try? Kanna.HTML(html: html, encoding: String.Encoding.utf8){
             let k = doc.css("p")

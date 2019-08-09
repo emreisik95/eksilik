@@ -390,18 +390,24 @@
 
   FIRInAppMessagingActionButton *primaryActionButton = nil;
   if (definition.renderData.contentData.actionButtonText) {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
     primaryActionButton = [[FIRInAppMessagingActionButton alloc]
         initWithButtonText:renderData.contentData.actionButtonText
            buttonTextColor:renderData.renderingEffectSettings.btnTextColor
            backgroundColor:renderData.renderingEffectSettings.btnBGColor];
+#pragma clang diagnostic pop
   }
 
   FIRInAppMessagingActionButton *secondaryActionButton = nil;
   if (definition.renderData.contentData.secondaryActionButtonText) {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
     secondaryActionButton = [[FIRInAppMessagingActionButton alloc]
         initWithButtonText:renderData.contentData.secondaryActionButtonText
            buttonTextColor:renderData.renderingEffectSettings.secondaryActionBtnTextColor
            backgroundColor:renderData.renderingEffectSettings.btnBGColor];
+#pragma clang diagnostic pop
   }
 
   FIRInAppMessagingCardDisplay *cardMessage = [[FIRInAppMessagingCardDisplay alloc]
@@ -431,6 +437,8 @@
   NSString *title = definition.renderData.contentData.titleText;
   NSString *body = definition.renderData.contentData.bodyText;
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
   FIRInAppMessagingBannerDisplay *bannerMessage = [[FIRInAppMessagingBannerDisplay alloc]
         initWithMessageID:definition.renderData.messageID
              campaignName:definition.renderData.name
@@ -442,6 +450,7 @@
           backgroundColor:definition.renderData.renderingEffectSettings.displayBGColor
                 imageData:imageData
                 actionURL:definition.renderData.contentData.actionURL];
+#pragma clang diagnostic pop
 
   return bannerMessage;
 }
@@ -450,6 +459,8 @@
     imageOnlyDisplayMessageWithMessageDefinition:(FIRIAMMessageDefinition *)definition
                                        imageData:(FIRInAppMessagingImageData *)imageData
                                      triggerType:(FIRInAppMessagingDisplayTriggerType)triggerType {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
   FIRInAppMessagingImageOnlyDisplay *imageOnlyMessage = [[FIRInAppMessagingImageOnlyDisplay alloc]
         initWithMessageID:definition.renderData.messageID
              campaignName:definition.renderData.name
@@ -457,6 +468,7 @@
               triggerType:triggerType
                 imageData:imageData
                 actionURL:definition.renderData.contentData.actionURL];
+#pragma clang diagnostic pop
 
   return imageOnlyMessage;
 }
@@ -474,12 +486,17 @@
   FIRInAppMessagingActionButton *actionButton = nil;
 
   if (definition.renderData.contentData.actionButtonText) {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
     actionButton = [[FIRInAppMessagingActionButton alloc]
         initWithButtonText:renderData.contentData.actionButtonText
            buttonTextColor:renderData.renderingEffectSettings.btnTextColor
            backgroundColor:renderData.renderingEffectSettings.btnBGColor];
+#pragma clang diagnostic pop
   }
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
   FIRInAppMessagingModalDisplay *modalViewMessage = [[FIRInAppMessagingModalDisplay alloc]
         initWithMessageID:definition.renderData.messageID
              campaignName:definition.renderData.name
@@ -492,6 +509,7 @@
                 imageData:imageData
              actionButton:actionButton
                 actionURL:definition.renderData.contentData.actionURL];
+#pragma clang diagnostic pop
 
   return modalViewMessage;
 }
@@ -547,14 +565,20 @@
           return;
         } else {
           if (standardImageRawData) {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
             imageData = [[FIRInAppMessagingImageData alloc]
                 initWithImageURL:message.renderData.contentData.imageURL.absoluteString
                        imageData:standardImageRawData];
+#pragma clang diagnostic pop
           }
           if (landscapeImageRawData) {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
             landscapeImageData = [[FIRInAppMessagingImageData alloc]
                 initWithImageURL:message.renderData.contentData.landscapeImageURL.absoluteString
                        imageData:landscapeImageRawData];
+#pragma clang diagnostic pop
           }
         }
 
@@ -578,6 +602,49 @@
               @"Interval time from last display is %lf seconds", intervalFromLastDisplayInSeconds);
 
   return intervalFromLastDisplayInSeconds >= self.setting.displayMinIntervalInMinutes * 60.0;
+}
+
+- (void)checkAndDisplayNextAppLaunchMessage {
+  // synchronizing on self so that we won't potentially enter the render flow from two
+  // threads.
+  @synchronized(self) {
+    if (!self.messageDisplayComponent) {
+      FIRLogDebug(kFIRLoggerInAppMessaging, @"I-IAM400028",
+                  @"Message display component is not present yet. No display should happen.");
+      return;
+    }
+
+    if (self.suppressMessageDisplay) {
+      FIRLogDebug(kFIRLoggerInAppMessaging, @"I-IAM400029",
+                  @"Message display is being suppressed. No regular message rendering.");
+      return;
+    }
+
+    if (self.isMsgBeingDisplayed) {
+      FIRLogDebug(kFIRLoggerInAppMessaging, @"I-IAM400030",
+                  @"An in-app message display is in progress, do not over-display on top of it.");
+      return;
+    }
+
+    if ([self.messageCache hasTestMessage] || [self enoughIntervalFromLastDisplay]) {
+      // We can display test messages anytime or display regular messages when
+      // the display time interval has been reached
+      FIRIAMMessageDefinition *nextAppLaunchMessage = [self.messageCache nextOnAppLaunchDisplayMsg];
+
+      if (nextAppLaunchMessage) {
+        [self displayForMessage:nextAppLaunchMessage
+                    triggerType:FIRInAppMessagingDisplayTriggerTypeOnAnalyticsEvent];
+        self.lastDisplayTime = [self.timeFetcher currentTimestampInSeconds];
+      } else {
+        FIRLogDebug(kFIRLoggerInAppMessaging, @"I-IAM400040",
+                    @"No appropriate in-app message detected for display.");
+      }
+    } else {
+      FIRLogDebug(kFIRLoggerInAppMessaging, @"I-IAM400041",
+                  @"Minimal display interval of %lf seconds has not been reached yet.",
+                  self.setting.displayMinIntervalInMinutes * 60.0);
+    }
+  }
 }
 
 - (void)checkAndDisplayNextAppForegroundMessage {

@@ -72,10 +72,10 @@ use_frameworks!
 pod 'SideMenu'
 
 # For Swift 5 use:
-# pod 'SideMenu', '~> 6.0.0'
+# pod 'SideMenu', '~> 6.0'
 
 # For Swift 4.2 (no longer maintained) use:
-# pod 'SideMenu', '~> 5.0.0'
+# pod 'SideMenu', '~> 5.0'
 ```
 
 Then, run the following command:
@@ -137,11 +137,11 @@ dismiss(animated: true, completion: nil)
 To use gestures you have to use the `SideMenuManager`. In your `AppDelegate` do something like this:
 ``` swift
 // Define the menus
-let menuLeftNavigationController = UISideMenuNavigationController(rootViewController: YourViewController)
-SideMenuManager.default.menuLeftNavigationController = menuLeftNavigationController
+let leftMenuNavigationController = UISideMenuNavigationController(rootViewController: YourViewController)
+SideMenuManager.default.leftMenuNavigationController = leftMenuNavigationController
 
-let menuRightNavigationController = UISideMenuNavigationController(rootViewController: YourViewController)
-SideMenuManager.default.menuRightNavigationController = menuRightNavigationController
+let rightMenuNavigationController = UISideMenuNavigationController(rootViewController: YourViewController)
+SideMenuManager.default.rightMenuNavigationController = rightMenuNavigationController
 
 // Setup gestures: the left and/or right menus must be set up (above) for these to work.
 // Note that these continue to work on the Navigation Controller independent of the view controller it displays!
@@ -149,9 +149,9 @@ SideMenuManager.default.addPanGestureToPresent(toView: self.navigationController
 SideMenuManager.default.addScreenEdgePanGesturesToPresent(toView: self.navigationController!.view)
 
 // (Optional) Prevent status bar area from turning black when menu appears:
-menuLeftNavigationController.statusBarEndAlpha = 0
+leftMenuNavigationController.statusBarEndAlpha = 0
 // Copy all settings to the other menu
-menuRightNavigationController.settings = menuLeftNavigationController.settings
+rightMenuNavigationController.settings = leftMenuNavigationController.settings
 ```
 That's it.
 ### Customization
@@ -159,9 +159,9 @@ That's it.
 `SideMenuManager` supports the following:
 ``` swift
 /// The left menu.
-open var menuLeftNavigationController: UISideMenuNavigationController?
+open var leftMenuNavigationController: UISideMenuNavigationController?
 /// The right menu.
-public var menuRightNavigationController: UISideMenuNavigationController?
+public var rightMenuNavigationController: UISideMenuNavigationController?
 /**
  Adds screen edge gestures for both left and right sides to a view to present a menu.
 
@@ -217,8 +217,10 @@ var dismissOnPush: Bool = true
 var dismissOnRotation: Bool = true
 /// Automatically dismisses the menu when app goes to the background.
 var dismissWhenBackgrounded: Bool = true
-/// Enable or disable gestures that would swipe to dismiss the menu. Default is true.
-var enableSwipeGestures: Bool = true
+/// Enable or disable a swipe gesture that dismisses the menu. Will not be triggered when `presentingViewControllerUserInteractionEnabled` is set to true. Default is true.
+var enableSwipeToDismissGesture: Bool = true
+/// Enable or disable a tap gesture that dismisses the menu. Will not be triggered when `presentingViewControllerUserInteractionEnabled` is set to true. Default is true.
+var enableTapToDismissGesture: Bool = true
 /// The animation initial spring velocity when a menu is displayed. Ignored when displayed with a gesture.
 var initialSpringVelocity: CGFloat = 1
 /// Whether the menu appears on the right or left side of the screen. Right is the default. This property cannot be changed after the menu has loaded.
@@ -256,21 +258,21 @@ var isHidden: Bool
 There are 8 pre-defined `SideMenuPresentStyle` options:
 ``` swift
 /// Menu slides in over the existing view.
-static let menuSlideIn = SideMenuPresentStyle
+static let menuSlideIn: SideMenuPresentStyle
 /// The existing view slides out to reveal the menu underneath.
-static let viewSlideOut = SideMenuPresentStyle
+static let viewSlideOut: SideMenuPresentStyle
 /// The existing view slides out while the menu slides in.
-static let viewSlideOutMenuIn = SideMenuPresentStyle
+static let viewSlideOutMenuIn: SideMenuPresentStyle
 /// The menu dissolves in over the existing view.
-static let menuDissolveIn = SideMenuPresentStyle
+static let menuDissolveIn: SideMenuPresentStyle
 /// The existing view slides out while the menu partially slides in.
-static let viewSlideOutMenuPartialIn = SideMenuPresentStyle
+static let viewSlideOutMenuPartialIn: SideMenuPresentStyle
 /// The existing view slides out while the menu slides out from under it.
-static let viewSlideOutMenuOut = SideMenuPresentStyle
+static let viewSlideOutMenuOut: SideMenuPresentStyle
 /// The existing view slides out while the menu partially slides out from under it.
-static let viewSlideOutMenuPartialOut = SideMenuPresentStyle
+static let viewSlideOutMenuPartialOut: SideMenuPresentStyle
 /// The existing view slides out and shrinks to reveal the menu underneath.
-static let viewSlideOutMenuZoom = SideMenuPresentStyle
+static let viewSlideOutMenuZoom: SideMenuPresentStyle
 ```
 #### UISideMenuNavigationControllerDelegate
 To receive notifications when a menu is displayed from a view controller, have it adhere to the  `UISideMenuNavigationControllerDelegate` protocol:

@@ -30,21 +30,14 @@ public class SideMenuManager: NSObject {
 
         var name: String {
             switch self {
-            case .left: return "menuLeftNavigationController"
-            case .right: return "menuRightNavigationController"
+            case .left: return "leftMenuNavigationController"
+            case .right: return "rightMenuNavigationController"
             }
         }
     }
 
-    private var _leftMenu: Protected<Menu?> =
-        Protected(nil,
-                  if: { $0?.isHidden != false },
-                  else: { _ in Print.warning(.menuInUse, arguments: PresentDirection.left.name, required: true) } )
-
-    private var _rightMenu: Protected<Menu?> =
-        Protected(nil,
-                  if: { $0?.isHidden != false },
-                  else: { _ in Print.warning(.menuInUse, arguments: PresentDirection.right.name, required: true) } )
+    private var _leftMenu: Protected<Menu?> = Protected(nil) { SideMenuManager.setMenu(fromMenu: $0, toMenu: $1) }
+    private var _rightMenu: Protected<Menu?> = Protected(nil) { SideMenuManager.setMenu(fromMenu: $0, toMenu: $1) }
 
     private var switching: Bool = false
 
@@ -58,13 +51,23 @@ public class SideMenuManager: NSObject {
 
     /// The left menu.
     open var leftMenuNavigationController: UISideMenuNavigationController? {
-        get { return _leftMenu.value }
+        get {
+            if _leftMenu.value?.isHidden == true {
+                _leftMenu.value?.leftSide = true
+            }
+            return _leftMenu.value
+        }
         set(menu) { _leftMenu.value = menu }
     }
     
     /// The right menu.
     open var rightMenuNavigationController: UISideMenuNavigationController? {
-        get { return _rightMenu.value }
+        get {
+            if _rightMenu.value?.isHidden == true {
+                _rightMenu.value?.leftSide = false
+            }
+            return _rightMenu.value
+        }
         set(menu) { _rightMenu.value = menu }
     }
 
@@ -122,6 +125,14 @@ internal extension SideMenuManager {
         case true: leftMenuNavigationController = menu
         case false: rightMenuNavigationController = menu
         }
+    }
+
+    private class func setMenu(fromMenu: Menu?, toMenu: Menu?) -> Menu? {
+        if fromMenu?.isHidden == false {
+            Print.warning(.menuInUse, arguments: PresentDirection.left.name, required: true)
+            return fromMenu
+        }
+        return toMenu
     }
 }
 
@@ -193,10 +204,8 @@ private extension SideMenuManager {
             screenEdgeGestureRecognizer.edges == edge {
             view.removeGestureRecognizer(screenEdgeGestureRecognizer)
         }
-        return SideMenuScreenEdgeGestureRecognizer {
+        return SideMenuScreenEdgeGestureRecognizer(addTo: view, target: self, action: #selector(handlePresentMenuScreenEdge(_:))).with {
             $0.edges = edge
-            $0.addTarget(self, action: #selector(handlePresentMenuScreenEdge(_:)))
-            view.addGestureRecognizer($0)
         }
     }
 
@@ -204,13 +213,10 @@ private extension SideMenuManager {
         if let panGestureRecognizer = view.gestureRecognizers?.first(where: { $0 is SideMenuPanGestureRecognizer }) as? SideMenuPanGestureRecognizer {
             return panGestureRecognizer
         }
-        return SideMenuPanGestureRecognizer {
-            $0.addTarget(self, action: #selector(handlePresentMenuPan(_:)))
-            view.addGestureRecognizer($0)
-        }
+        return SideMenuPanGestureRecognizer(addTo: view, target: self, action: #selector(handlePresentMenuPan(_:)))
     }
 
-    private var activeViewController: UIViewController? {
+    var activeViewController: UIViewController? {
         return UIApplication.shared.keyWindow?.rootViewController?.activeViewController
     }
 }

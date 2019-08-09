@@ -52,6 +52,8 @@
 		35BBFBF32221B9540020EEDA /* RefreshView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35BBFBF12221B9540020EEDA /* RefreshView.swift */; };
 		35BBFBF42221B9540020EEDA /* RefreshView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 35BBFBF22221B9540020EEDA /* RefreshView.xib */; };
 		35BEFD1A225A8FD0001D545E /* tema.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35BEFD19225A8FD0001D545E /* tema.swift */; };
+		35D5F97D22F384FF00CE60F0 /* olayMesaj.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35D5F97C22F384FE00CE60F0 /* olayMesaj.swift */; };
+		35D5F97F22F3980700CE60F0 /* gundemController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35D5F97E22F3980700CE60F0 /* gundemController.swift */; };
 		35F280312262914F00EDE7F7 /* FirstViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35F280302262914F00EDE7F7 /* FirstViewController.swift */; };
 		35F2803B226381E500EDE7F7 /* UIView+constraints.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35F2803A226381E500EDE7F7 /* UIView+constraints.swift */; };
 		35F280412263D5FC00EDE7F7 /* olayViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35F280402263D5FB00EDE7F7 /* olayViewController.swift */; };
@@ -152,6 +154,8 @@
 		35BBFBF12221B9540020EEDA /* RefreshView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = RefreshView.swift; path = "../../../../../Downloads/Eksilik-master/Eksilik/Xib/RefreshView.swift"; sourceTree = "<group>"; };
 		35BBFBF22221B9540020EEDA /* RefreshView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = RefreshView.xib; path = "../../../../../Downloads/Eksilik-master/Eksilik/Xib/RefreshView.xib"; sourceTree = "<group>"; };
 		35BEFD19225A8FD0001D545E /* tema.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = tema.swift; sourceTree = "<group>"; };
+		35D5F97C22F384FE00CE60F0 /* olayMesaj.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = olayMesaj.swift; sourceTree = "<group>"; };
+		35D5F97E22F3980700CE60F0 /* gundemController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = gundemController.swift; sourceTree = "<group>"; };
 		35F280302262914F00EDE7F7 /* FirstViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FirstViewController.swift; sourceTree = "<group>"; };
 		35F2803A226381E500EDE7F7 /* UIView+constraints.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "UIView+constraints.swift"; sourceTree = "<group>"; };
 		35F280402263D5FB00EDE7F7 /* olayViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = olayViewController.swift; path = Eksilik/ViewControllers/Olay/olayViewController.swift; sourceTree = SOURCE_ROOT; };
@@ -212,6 +216,7 @@
 			isa = PBXGroup;
 			children = (
 				35F280402263D5FB00EDE7F7 /* olayViewController.swift */,
+				35D5F97C22F384FE00CE60F0 /* olayMesaj.swift */,
 			);
 			path = Olay;
 			sourceTree = "<group>";
@@ -275,6 +280,7 @@
 				35F280302262914F00EDE7F7 /* FirstViewController.swift */,
 				356AB76E22166F200020AA31 /* SecondViewController.swift */,
 				35FD00EC2270492100B359E8 /* RastgeleViewController.swift */,
+				35D5F97E22F3980700CE60F0 /* gundemController.swift */,
 			);
 			name = "Giriş";
 			path = "Giriş";
@@ -704,6 +710,7 @@
 				356EC5E022189B9B00C9C956 /* CustomRefreshControl.xcdatamodeld in Sources */,
 				3538F73F221C5A2300011771 /* Gif+Image.swift in Sources */,
 				354C3DF922419E4700B1A6F5 /* fonksiyonlar.swift in Sources */,
+				35D5F97F22F3980700CE60F0 /* gundemController.swift in Sources */,
 				35105B03224E837A00D8ABD3 /* BenViewController.swift in Sources */,
 				350F5BDA22466A910023C0AA /* SuserViewController.swift in Sources */,
 				35F280412263D5FC00EDE7F7 /* olayViewController.swift in Sources */,
@@ -723,6 +730,7 @@
 				350EA2A8224AB5D60016EE14 /* TarihPageViewController.swift in Sources */,
 				35FD00F2227092E100B359E8 /* sorunselEntryViewController.swift in Sources */,
 				35171420226B575D0078C2DC /* mesajYazViewController.swift in Sources */,
+				35D5F97D22F384FF00CE60F0 /* olayMesaj.swift in Sources */,
 				356AB77F221686B00020AA31 /* EntryViewController.swift in Sources */,
 				356AB76B22166F200020AA31 /* AppDelegate.swift in Sources */,
 				35105B05224F553A00D8ABD3 /* AyarViewController.swift in Sources */,
@@ -785,7 +793,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.0.9;
+				MARKETING_VERSION = 1.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = emre.isik.Eksilik.gundem;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -808,7 +816,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.0.9;
+				MARKETING_VERSION = 1.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = emre.isik.Eksilik.gundem;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -951,7 +959,7 @@
 					"@executable_path/Frameworks",
 				);
 				MACH_O_TYPE = mh_execute;
-				MARKETING_VERSION = 1.0.9;
+				MARKETING_VERSION = 1.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = emre.isik.Eksilik;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -977,7 +985,7 @@
 					"@executable_path/Frameworks",
 				);
 				MACH_O_TYPE = mh_execute;
-				MARKETING_VERSION = 1.0.9;
+				MARKETING_VERSION = 1.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = emre.isik.Eksilik;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";

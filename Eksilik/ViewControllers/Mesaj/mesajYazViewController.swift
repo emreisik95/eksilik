@@ -40,7 +40,7 @@ class mesajYazViewController: UIViewController, UITextViewDelegate {
         let entryToolbar = UIToolbar(frame:CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width, height: 50))
         entryToolbar.barStyle = Theme.barStyle!
         entryToolbar.tintColor = Theme.userColor
-        UIBarButtonItem().setTitleTextAttributes([NSAttributedString.Key.font : UIFont(name: font!, size: 12.0)!], for: .normal)
+        UIBarButtonItem().setTitleTextAttributes([NSAttributedString.Key.font : UIFont(name: "Helvetica", size: 12.0)!], for: .normal)
         entryToolbar.items = [
             UIBarButtonItem(title: "(bkz:)", style: .plain, target: self, action: #selector(bkz)),
             UIBarButtonItem(title: "hede", style: .plain, target: self, action: #selector(hede)),

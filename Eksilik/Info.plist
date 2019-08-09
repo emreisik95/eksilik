@@ -87,6 +87,8 @@
 		<key>NSAllowsArbitraryLoads</key>
 		<true/>
 	</dict>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>entry paylaşma butonuna bastığınızda görseli kaydedebilmeniz için gereklidir.</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>fetch</string>
